@@ -1,11 +1,24 @@
-"""Base sandbox implementation with execute() as the only abstract method.
+"""
+모듈명: sandbox.py
+설명: execute()만 추상 메서드로 하는 기본 샌드박스 구현
 
-This module provides a base class that implements all SandboxBackendProtocol
-methods using shell commands executed via execute(). Concrete implementations
-only need to implement the execute() method.
+이 모듈은 execute()를 통해 실행되는 셸 명령으로 모든
+SandboxBackendProtocol 메서드를 구현하는 기본 클래스를 제공합니다.
+구체적인 구현은 execute() 메서드만 구현하면 됩니다.
 
-It also defines the SandboxProvider abstract base class for third-party SDK
-implementations to manage sandbox lifecycle (list, create, delete).
+또한 샌드박스 생명주기 관리(list, create, delete)를 위한 서드파티 SDK
+구현용 SandboxProvider 추상 기본 클래스도 정의합니다.
+
+주요 클래스:
+    - BaseSandbox: execute()만 구현하면 되는 샌드박스 기본 클래스
+    - SandboxProvider: 샌드박스 생명주기 관리를 위한 추상 기본 클래스
+    - SandboxInfo: 샌드박스 메타데이터 정보를 담는 TypedDict
+    - SandboxListResponse: 페이지네이션된 샌드박스 목록 응답
+
+설계 철학:
+    - 셸 명령 기반 구현으로 다양한 실행 환경 지원
+    - 부분 성공(partial success) 패턴으로 안정적인 파일 작업
+    - 타입 안전성을 위한 제네릭 메타데이터 지원
 """
 
 from __future__ import annotations
@@ -30,14 +43,15 @@ from deepagents.backends.protocol import (
     WriteResult,
 )
 
-# Type variable for provider-specific metadata
+# 프로바이더별 메타데이터를 위한 타입 변수
 MetadataT = TypeVar("MetadataT", covariant=True)
-"""Type variable for sandbox metadata.
+"""샌드박스 메타데이터용 타입 변수.
 
-Providers can define their own TypedDict to specify the structure of sandbox metadata,
-enabling type-safe access to metadata fields.
+프로바이더는 샌드박스 메타데이터의 구조를 지정하기 위해
+자체 TypedDict를 정의할 수 있으며, 이를 통해 메타데이터 필드에
+타입 안전하게 접근할 수 있습니다.
 
-Example:
+사용 예시:
     ```python
     class ProviderMetadata(TypedDict, total=False):
         status: Literal["running", "stopped"]
@@ -48,7 +62,7 @@ Example:
         def list(
             self, *, cursor=None, **kwargs: Any
         ) -> SandboxListResponse[ProviderMetadata]:
-            # Extract kwargs as needed
+            # 필요에 따라 kwargs 추출
             status = kwargs.get("status")
             ...
     ```
@@ -56,30 +70,30 @@ Example:
 
 
 class SandboxInfo(TypedDict, Generic[MetadataT]):
-    """Metadata for a single sandbox instance.
+    """단일 샌드박스 인스턴스의 메타데이터.
 
-    This lightweight structure is returned from list operations and provides
-    basic information about a sandbox without requiring a full connection.
+    이 경량 구조체는 목록 작업에서 반환되며, 전체 연결 없이도
+    샌드박스에 대한 기본 정보를 제공합니다.
 
-    Type Parameters:
-        MetadataT: Type of the metadata field. Providers should define a TypedDict
-            for type-safe metadata access.
+    타입 파라미터:
+        MetadataT: 메타데이터 필드의 타입. 프로바이더는 타입 안전한
+            메타데이터 접근을 위해 TypedDict를 정의해야 함.
 
-    Attributes:
-        sandbox_id: Unique identifier for the sandbox instance.
-        metadata: Optional provider-specific metadata (e.g., creation time, status,
-            resource limits, template information). Structure is provider-defined.
+    속성:
+        sandbox_id: 샌드박스 인스턴스의 고유 식별자.
+        metadata: 선택적 프로바이더별 메타데이터 (예: 생성 시간, 상태,
+            리소스 제한, 템플릿 정보). 구조는 프로바이더가 정의.
 
-    Example:
+    사용 예시:
         ```python
-        # Using default dict[str, Any]
+        # 기본 dict[str, Any] 사용
         info: SandboxInfo = {
             "sandbox_id": "sb_abc123",
             "metadata": {"status": "running", "created_at": "2024-01-15T10:30:00Z", "template": "python-3.11"},
         }
 
 
-        # Using typed metadata
+        # 타입이 지정된 메타데이터 사용
         class MyMetadata(TypedDict, total=False):
             status: Literal["running", "stopped"]
             created_at: str
@@ -97,28 +111,28 @@ class SandboxInfo(TypedDict, Generic[MetadataT]):
 
 
 class SandboxListResponse(TypedDict, Generic[MetadataT]):
-    """Paginated response from a sandbox list operation.
+    """샌드박스 목록 작업의 페이지네이션된 응답.
 
-    This structure supports cursor-based pagination for efficiently browsing
-    large collections of sandboxes.
+    이 구조체는 대규모 샌드박스 컬렉션을 효율적으로 탐색하기 위한
+    커서 기반 페이지네이션을 지원합니다.
 
-    Type Parameters:
-        MetadataT: Type of the metadata field in SandboxInfo items.
+    타입 파라미터:
+        MetadataT: SandboxInfo 항목의 메타데이터 필드 타입.
 
-    Attributes:
-        items: List of sandbox metadata objects for the current page.
-        cursor: Opaque continuation token for retrieving the next page.
-            None indicates no more pages available. Clients should treat this
-            as an opaque string and pass it to subsequent list() calls.
+    속성:
+        items: 현재 페이지의 샌드박스 메타데이터 객체 목록.
+        cursor: 다음 페이지를 조회하기 위한 불투명 연속 토큰.
+            None은 더 이상 페이지가 없음을 나타냄. 클라이언트는
+            이것을 불투명 문자열로 취급하고 후속 list() 호출에 전달해야 함.
 
-    Example:
+    사용 예시:
         ```python
         response: SandboxListResponse[MyMetadata] = {
             "items": [{"sandbox_id": "sb_001", "metadata": {"status": "running"}}, {"sandbox_id": "sb_002", "metadata": {"status": "stopped"}}],
             "cursor": "eyJvZmZzZXQiOjEwMH0=",
         }
 
-        # Fetch next page
+        # 다음 페이지 가져오기
         next_response = provider.list(cursor=response["cursor"])
         ```
     """
@@ -128,28 +142,30 @@ class SandboxListResponse(TypedDict, Generic[MetadataT]):
 
 
 class SandboxProvider(ABC, Generic[MetadataT]):
-    """Abstract base class for third-party sandbox provider implementations.
+    """서드파티 샌드박스 프로바이더 구현을 위한 추상 기본 클래스.
 
-    Defines the lifecycle management interface for sandbox providers. Implementations
-    should integrate with their respective SDKs to provide standardized sandbox
-    lifecycle operations (list, get_or_create, delete).
+    샌드박스 프로바이더의 생명주기 관리 인터페이스를 정의합니다.
+    구현은 각 SDK와 통합하여 표준화된 샌드박스 생명주기 작업
+    (list, get_or_create, delete)을 제공해야 합니다.
 
-    Implementations can add provider-specific parameters as keyword-only arguments
-    with defaults, maintaining compatibility while providing type-safe APIs.
+    구현은 호환성을 유지하면서 타입 안전한 API를 제공하기 위해
+    기본값이 있는 키워드 전용 인자로 프로바이더별 파라미터를 추가할 수 있습니다.
 
-    Sync/Async Convention: Following LangChain convention, providers should offer both
-    sync and async methods in the same namespace if possible (doesn't hurt performance)
-    (e.g., both `list()` and `alist()` in one class). The default async implementations
-    delegate to sync methods via a thread pool. Providers can override async methods to
-    provide optimized async implementations if needed.
+    동기/비동기 규약:
+        LangChain 규약을 따라, 프로바이더는 가능하면 같은 네임스페이스에
+        동기와 비동기 메서드를 모두 제공해야 합니다 (성능에 영향 없음).
+        (예: 한 클래스에 list()와 alist() 모두 제공)
+        기본 비동기 구현은 스레드 풀을 통해 동기 메서드에 위임합니다.
+        프로바이더는 필요시 최적화된 비동기 구현을 위해 비동기 메서드를
+        오버라이드할 수 있습니다.
 
-    Alternatively, if necessary for performance optimization, providers may split into
-    separate implementations (e.g., `MySyncProvider` and `MyAsyncProvider`). In this
-    case, unimplemented methods should raise NotImplementedError with clear guidance
-    (e.g., "This provider only supports async operations. Use 'await provider.alist()'
-    or switch to MySyncProvider for synchronous code").
+        또는 성능 최적화가 필요한 경우, 별도 구현으로 분리할 수 있습니다
+        (예: MySyncProvider와 MyAsyncProvider). 이 경우, 구현되지 않은
+        메서드는 명확한 안내와 함께 NotImplementedError를 발생시켜야 합니다
+        (예: "이 프로바이더는 비동기 작업만 지원합니다. 'await provider.alist()'를
+        사용하거나 동기 코드용 MySyncProvider로 전환하세요").
 
-    Example Implementation:
+    구현 예시:
         ```python
         class CustomMetadata(TypedDict, total=False):
             status: Literal["running", "stopped"]
@@ -161,18 +177,18 @@ class SandboxProvider(ABC, Generic[MetadataT]):
             def list(
                 self, *, cursor=None, status: Literal["running", "stopped"] | None = None, template_id: str | None = None, **kwargs: Any
             ) -> SandboxListResponse[CustomMetadata]:
-                # Type-safe parameters with IDE autocomplete
-                # ... query provider API
+                # IDE 자동완성이 가능한 타입 안전 파라미터
+                # ... 프로바이더 API 쿼리
                 return {"items": [...], "cursor": None}
 
             def get_or_create(
                 self, *, sandbox_id=None, template_id: str = "default", timeout_minutes: int | None = None, **kwargs: Any
             ) -> SandboxBackendProtocol:
-                # Type-safe parameters with IDE autocomplete
+                # IDE 자동완성이 가능한 타입 안전 파라미터
                 return CustomSandbox(sandbox_id or self._create_new(), template_id)
 
             def delete(self, *, sandbox_id: str, force: bool = False, **kwargs: Any) -> None:
-                # Implementation
+                # 구현
                 self._client.delete(sandbox_id, force=force)
         ```
     """
@@ -184,34 +200,33 @@ class SandboxProvider(ABC, Generic[MetadataT]):
         cursor: str | None = None,
         **kwargs: Any,
     ) -> SandboxListResponse[MetadataT]:
-        """List available sandboxes with optional filtering and pagination.
+        """사용 가능한 샌드박스를 선택적 필터링과 페이지네이션으로 나열합니다.
 
-        Args:
-            cursor: Optional continuation token from a previous list() call.
-                Pass None to start from the beginning. The cursor is opaque
-                and provider-specific; clients should not parse or modify it.
-            **kwargs: Provider-specific filter parameters. Implementations should
-                expose these as named keyword-only parameters with defaults for
-                type safety. Common examples include status filters, creation time
-                ranges, template filters, or owner filters.
+        인자:
+            cursor: 이전 list() 호출의 선택적 연속 토큰.
+                처음부터 시작하려면 None 전달. 커서는 불투명하고
+                프로바이더별로 다름; 클라이언트는 이를 파싱하거나 수정하면 안 됨.
+            **kwargs: 프로바이더별 필터 파라미터. 구현은 타입 안전성을 위해
+                기본값이 있는 명명된 키워드 전용 파라미터로 노출해야 함.
+                일반적인 예: 상태 필터, 생성 시간 범위, 템플릿 필터, 소유자 필터.
 
-        Returns:
-            SandboxListResponse containing:
-                - items: List of sandbox metadata for the current page
-                - cursor: Token for next page, or None if this is the last page
+        반환값:
+            다음을 포함하는 SandboxListResponse:
+                - items: 현재 페이지의 샌드박스 메타데이터 목록
+                - cursor: 다음 페이지 토큰, 마지막 페이지면 None
 
-        Example:
+        사용 예시:
             ```python
-            # First page
+            # 첫 번째 페이지
             response = provider.list()
             for sandbox in response["items"]:
                 print(sandbox["sandbox_id"])
 
-            # Next page if available
+            # 다음 페이지가 있으면 가져오기
             if response["cursor"]:
                 next_response = provider.list(cursor=response["cursor"])
 
-            # With filters (if provider supports them)
+            # 필터 사용 (프로바이더가 지원하는 경우)
             running = provider.list(status="running")
             ```
         """
@@ -223,49 +238,48 @@ class SandboxProvider(ABC, Generic[MetadataT]):
         sandbox_id: str | None = None,
         **kwargs: Any,
     ) -> SandboxBackendProtocol:
-        """Get an existing sandbox or create a new one.
+        """기존 샌드박스를 가져오거나 새로 생성합니다.
 
-        This method retrieves a connection to an existing sandbox if sandbox_id
-        is provided, or creates a new sandbox instance if sandbox_id is None.
-        The returned object implements SandboxBackendProtocol and can be used
-        for all sandbox operations (execute, read, write, etc.).
+        이 메서드는 sandbox_id가 제공되면 기존 샌드박스에 대한 연결을 조회하고,
+        sandbox_id가 None이면 새 샌드박스 인스턴스를 생성합니다.
+        반환된 객체는 SandboxBackendProtocol을 구현하며 모든 샌드박스 작업
+        (execute, read, write 등)에 사용할 수 있습니다.
 
-        Important: If a sandbox_id is provided but does not exist, this method
-        should raise an error rather than creating a new sandbox. Only when
-        sandbox_id is explicitly None should a new sandbox be created.
+        중요: sandbox_id가 제공되었지만 존재하지 않으면, 새 샌드박스를
+        생성하지 않고 오류를 발생시켜야 합니다. sandbox_id가 명시적으로
+        None일 때만 새 샌드박스를 생성해야 합니다.
 
-        Args:
-            sandbox_id: Unique identifier of an existing sandbox to retrieve.
-                If None, creates a new sandbox instance. The new sandbox's ID
-                can be accessed via the returned object's .id property.
-                If a non-None value is provided but the sandbox doesn't exist,
-                an error will be raised.
-            **kwargs: Provider-specific creation/connection parameters. Implementations
-                should expose these as named keyword-only parameters with defaults
-                for type safety. Common examples include template_id, resource limits,
-                environment variables, or timeout settings.
+        인자:
+            sandbox_id: 조회할 기존 샌드박스의 고유 식별자.
+                None이면 새 샌드박스 인스턴스 생성. 새 샌드박스의 ID는
+                반환된 객체의 .id 속성으로 접근 가능.
+                None이 아닌 값이 제공되었지만 샌드박스가 존재하지 않으면
+                오류가 발생함.
+            **kwargs: 프로바이더별 생성/연결 파라미터. 구현은 타입 안전성을 위해
+                기본값이 있는 명명된 키워드 전용 파라미터로 노출해야 함.
+                일반적인 예: template_id, 리소스 제한, 환경 변수, 타임아웃 설정.
 
-        Returns:
-            An object implementing SandboxBackendProtocol that can execute
-            commands, read/write files, and perform other sandbox operations.
+        반환값:
+            명령 실행, 파일 읽기/쓰기 및 기타 샌드박스 작업을 수행할 수 있는
+            SandboxBackendProtocol을 구현하는 객체.
 
-        Raises:
-            Implementation-specific exceptions for errors such as:
-                - Sandbox not found (if sandbox_id provided but doesn't exist)
-                - Insufficient permissions
-                - Resource limits exceeded
-                - Invalid template or configuration
+        예외:
+            다음과 같은 오류에 대한 구현별 예외:
+                - 샌드박스를 찾을 수 없음 (sandbox_id가 제공되었지만 존재하지 않는 경우)
+                - 권한 부족
+                - 리소스 제한 초과
+                - 잘못된 템플릿 또는 구성
 
-        Example:
+        사용 예시:
             ```python
-            # Create a new sandbox
+            # 새 샌드박스 생성
             sandbox = provider.get_or_create(sandbox_id=None, template_id="python-3.11", timeout_minutes=60)
             print(sandbox.id)  # "sb_new123"
 
-            # Reconnect to existing sandbox
+            # 기존 샌드박스에 재연결
             existing = provider.get_or_create(sandbox_id="sb_new123")
 
-            # Use the sandbox
+            # 샌드박스 사용
             result = sandbox.execute("python --version")
             print(result.output)
             ```
@@ -278,37 +292,36 @@ class SandboxProvider(ABC, Generic[MetadataT]):
         sandbox_id: str,
         **kwargs: Any,
     ) -> None:
-        """Delete a sandbox instance.
+        """샌드박스 인스턴스를 삭제합니다.
 
-        This permanently destroys the sandbox and all its associated data.
-        The operation is typically irreversible.
+        이 작업은 샌드박스와 모든 관련 데이터를 영구적으로 파괴합니다.
+        일반적으로 작업은 되돌릴 수 없습니다.
 
-        Idempotency: This method should be idempotent - calling delete on a
-        non-existent sandbox should succeed without raising an error. This makes
-        cleanup code simpler and safe to retry.
+        멱등성: 이 메서드는 멱등성을 가져야 합니다 - 존재하지 않는 샌드박스에
+        delete를 호출해도 오류 없이 성공해야 합니다. 이렇게 하면 정리 코드가
+        간단해지고 재시도해도 안전합니다.
 
-        Args:
-            sandbox_id: Unique identifier of the sandbox to delete.
-            **kwargs: Provider-specific deletion options. Implementations should
-                expose these as named keyword-only parameters with defaults for
-                type safety. Common examples include force flags, grace periods,
-                or cleanup options.
+        인자:
+            sandbox_id: 삭제할 샌드박스의 고유 식별자.
+            **kwargs: 프로바이더별 삭제 옵션. 구현은 타입 안전성을 위해
+                기본값이 있는 명명된 키워드 전용 파라미터로 노출해야 함.
+                일반적인 예: 강제 플래그, 유예 기간, 정리 옵션.
 
-        Raises:
-            Implementation-specific exceptions for errors such as:
-                - Insufficient permissions
-                - Sandbox is locked or in use
-                - Network or API errors
+        예외:
+            다음과 같은 오류에 대한 구현별 예외:
+                - 권한 부족
+                - 샌드박스가 잠겨 있거나 사용 중
+                - 네트워크 또는 API 오류
 
-        Example:
+        사용 예시:
             ```python
-            # Simple deletion
+            # 단순 삭제
             provider.delete(sandbox_id="sb_123")
 
-            # Safe to call multiple times (idempotent)
-            provider.delete(sandbox_id="sb_123")  # No error even if already deleted
+            # 여러 번 호출해도 안전 (멱등성)
+            provider.delete(sandbox_id="sb_123")  # 이미 삭제되어도 오류 없음
 
-            # With options (if provider supports them)
+            # 옵션 사용 (프로바이더가 지원하는 경우)
             provider.delete(sandbox_id="sb_456", force=True)
             ```
         """
@@ -319,17 +332,17 @@ class SandboxProvider(ABC, Generic[MetadataT]):
         cursor: str | None = None,
         **kwargs: Any,
     ) -> SandboxListResponse[MetadataT]:
-        """Async version of list().
+        """list()의 비동기 버전.
 
-        By default, runs the synchronous list() method in a thread pool.
-        Providers can override this for native async implementations.
+        기본적으로 동기 list() 메서드를 스레드 풀에서 실행합니다.
+        프로바이더는 네이티브 비동기 구현을 위해 이를 오버라이드할 수 있습니다.
 
-        Args:
-            cursor: Optional continuation token from a previous list() call.
-            **kwargs: Provider-specific filter parameters.
+        인자:
+            cursor: 이전 list() 호출의 선택적 연속 토큰.
+            **kwargs: 프로바이더별 필터 파라미터.
 
-        Returns:
-            SandboxListResponse containing items and cursor for pagination.
+        반환값:
+            페이지네이션을 위한 items와 cursor를 포함하는 SandboxListResponse.
         """
         return await asyncio.to_thread(self.list, cursor=cursor, **kwargs)
 
@@ -339,23 +352,23 @@ class SandboxProvider(ABC, Generic[MetadataT]):
         sandbox_id: str | None = None,
         **kwargs: Any,
     ) -> SandboxBackendProtocol:
-        """Async version of get_or_create().
+        """get_or_create()의 비동기 버전.
 
-        By default, runs the synchronous get_or_create() method in a thread pool.
-        Providers can override this for native async implementations.
+        기본적으로 동기 get_or_create() 메서드를 스레드 풀에서 실행합니다.
+        프로바이더는 네이티브 비동기 구현을 위해 이를 오버라이드할 수 있습니다.
 
-        Important: If a sandbox_id is provided but does not exist, this method
-        should raise an error rather than creating a new sandbox. Only when
-        sandbox_id is explicitly None should a new sandbox be created.
+        중요: sandbox_id가 제공되었지만 존재하지 않으면, 새 샌드박스를
+        생성하지 않고 오류를 발생시켜야 합니다. sandbox_id가 명시적으로
+        None일 때만 새 샌드박스를 생성해야 합니다.
 
-        Args:
-            sandbox_id: Unique identifier of an existing sandbox to retrieve.
-                If None, creates a new sandbox instance. If a non-None value
-                is provided but the sandbox doesn't exist, an error will be raised.
-            **kwargs: Provider-specific creation/connection parameters.
+        인자:
+            sandbox_id: 조회할 기존 샌드박스의 고유 식별자.
+                None이면 새 샌드박스 인스턴스 생성. None이 아닌 값이
+                제공되었지만 샌드박스가 존재하지 않으면 오류가 발생함.
+            **kwargs: 프로바이더별 생성/연결 파라미터.
 
-        Returns:
-            An object implementing SandboxBackendProtocol.
+        반환값:
+            SandboxBackendProtocol을 구현하는 객체.
         """
         return await asyncio.to_thread(self.get_or_create, sandbox_id=sandbox_id, **kwargs)
 
@@ -365,25 +378,34 @@ class SandboxProvider(ABC, Generic[MetadataT]):
         sandbox_id: str,
         **kwargs: Any,
     ) -> None:
-        """Async version of delete().
+        """delete()의 비동기 버전.
 
-        By default, runs the synchronous delete() method in a thread pool.
-        Providers can override this for native async implementations.
+        기본적으로 동기 delete() 메서드를 스레드 풀에서 실행합니다.
+        프로바이더는 네이티브 비동기 구현을 위해 이를 오버라이드할 수 있습니다.
 
-        Args:
-            sandbox_id: Unique identifier of the sandbox to delete.
-            **kwargs: Provider-specific deletion options.
+        인자:
+            sandbox_id: 삭제할 샌드박스의 고유 식별자.
+            **kwargs: 프로바이더별 삭제 옵션.
         """
         await asyncio.to_thread(self.delete, sandbox_id=sandbox_id, **kwargs)
 
 
+# ============================================================================
+# 셸 명령 템플릿
+# ============================================================================
+# 이 템플릿들은 원격 샌드박스에서 셸 명령을 통해 파일 작업을 수행합니다.
+# Python 스크립트를 셸에서 실행하여 파일시스템 작업을 수행하고
+# 결과를 JSON 형식으로 반환합니다.
+
+# Glob 명령 템플릿: 파일 패턴 매칭을 수행
+# base64로 인코딩된 경로와 패턴을 받아 매칭되는 파일 정보를 JSON으로 출력
 _GLOB_COMMAND_TEMPLATE = """python3 -c "
 import glob
 import os
 import json
 import base64
 
-# Decode base64-encoded parameters
+# base64로 인코딩된 파라미터 디코딩
 path = base64.b64decode('{path_b64}').decode('utf-8')
 pattern = base64.b64decode('{pattern_b64}').decode('utf-8')
 
@@ -400,19 +422,19 @@ for m in matches:
     print(json.dumps(result))
 " 2>/dev/null"""
 
-# Use heredoc to pass content via stdin to avoid ARG_MAX limits on large files.
-# ARG_MAX limits the total size of command-line arguments.
-# Previously, base64-encoded content was interpolated directly into the command
-# string, which would fail for files larger than ~100KB after base64 expansion.
-# Heredocs bypass this by passing data through stdin rather than as arguments.
-# Stdin format: first line is base64-encoded file path, second line is base64-encoded content.
+# 쓰기 명령 템플릿: 대용량 파일의 ARG_MAX 제한을 피하기 위해 heredoc 사용
+# ARG_MAX는 명령행 인수의 총 크기를 제한합니다.
+# 이전에는 base64로 인코딩된 콘텐츠를 명령 문자열에 직접 삽입했는데,
+# base64 확장 후 ~100KB 이상의 파일에서 실패했습니다.
+# Heredoc은 인수가 아닌 stdin을 통해 데이터를 전달하여 이를 우회합니다.
+# Stdin 형식: JSON 페이로드에 파일 경로와 콘텐츠가 base64로 인코딩됨
 _WRITE_COMMAND_TEMPLATE = """python3 -c "
 import os
 import sys
 import base64
 import json
 
-# Read JSON payload from stdin containing file_path and content (both base64-encoded)
+# stdin에서 file_path와 content(둘 다 base64 인코딩)를 포함하는 JSON 페이로드 읽기
 payload_b64 = sys.stdin.read().strip()
 if not payload_b64:
     print('Error: No payload received for write operation', file=sys.stderr)
@@ -427,12 +449,12 @@ except Exception as e:
     print(f'Error: Failed to decode write payload: {{e}}', file=sys.stderr)
     sys.exit(1)
 
-# Check if file already exists (atomic with write)
+# 파일이 이미 존재하는지 확인 (쓰기와 원자적으로)
 if os.path.exists(file_path):
     print(f'Error: File \\'{{file_path}}\\' already exists', file=sys.stderr)
     sys.exit(1)
 
-# Create parent directory if needed
+# 필요시 부모 디렉토리 생성
 parent_dir = os.path.dirname(file_path) or '.'
 os.makedirs(parent_dir, exist_ok=True)
 
@@ -442,17 +464,17 @@ with open(file_path, 'w') as f:
 {payload_b64}
 __DEEPAGENTS_EOF__"""
 
-# Use heredoc to pass edit parameters via stdin to avoid ARG_MAX limits.
-# Stdin format: base64-encoded JSON with {"path": str, "old": str, "new": str}.
-# JSON bundles all parameters; base64 ensures safe transport of arbitrary content
-# (special chars, newlines, etc.) through the heredoc without escaping issues.
+# 편집 명령 템플릿: ARG_MAX 제한을 피하기 위해 heredoc으로 편집 파라미터 전달
+# Stdin 형식: {"path": str, "old": str, "new": str}를 포함하는 base64 인코딩 JSON
+# JSON은 모든 파라미터를 번들링하고, base64는 이스케이프 문제 없이
+# 임의 콘텐츠(특수 문자, 줄바꿈 등)의 안전한 전송을 보장
 _EDIT_COMMAND_TEMPLATE = """python3 -c "
 import sys
 import base64
 import json
 import os
 
-# Read and decode JSON payload from stdin
+# stdin에서 JSON 페이로드 읽기 및 디코딩
 payload_b64 = sys.stdin.read().strip()
 if not payload_b64:
     print('Error: No payload received for edit operation', file=sys.stderr)
@@ -468,30 +490,30 @@ except Exception as e:
     print(f'Error: Failed to decode edit payload: {{e}}', file=sys.stderr)
     sys.exit(4)
 
-# Check if file exists
+# 파일 존재 확인
 if not os.path.isfile(file_path):
-    sys.exit(3)  # File not found
+    sys.exit(3)  # 파일 없음
 
-# Read file content
+# 파일 내용 읽기
 with open(file_path, 'r') as f:
     text = f.read()
 
-# Count occurrences
+# 발생 횟수 계산
 count = text.count(old)
 
-# Exit with error codes if issues found
+# 문제가 발견되면 오류 코드와 함께 종료
 if count == 0:
-    sys.exit(1)  # String not found
+    sys.exit(1)  # 문자열 없음
 elif count > 1 and not {replace_all}:
-    sys.exit(2)  # Multiple occurrences without replace_all
+    sys.exit(2)  # replace_all 없이 다중 발생
 
-# Perform replacement
+# 교체 수행
 if {replace_all}:
     result = text.replace(old, new)
 else:
     result = text.replace(old, new, 1)
 
-# Write back to file
+# 파일에 다시 쓰기
 with open(file_path, 'w') as f:
     f.write(result)
 
@@ -500,6 +522,8 @@ print(count)
 {payload_b64}
 __DEEPAGENTS_EOF__"""
 
+# 읽기 명령 템플릿: 오프셋과 제한으로 파일 내용 읽기
+# 줄 번호와 함께 포맷팅된 출력 반환
 _READ_COMMAND_TEMPLATE = """python3 -c "
 import os
 import sys
@@ -508,39 +532,50 @@ file_path = '{file_path}'
 offset = {offset}
 limit = {limit}
 
-# Check if file exists
+# 파일 존재 확인
 if not os.path.isfile(file_path):
     print('Error: File not found')
     sys.exit(1)
 
-# Check if file is empty
+# 파일이 비어있는지 확인
 if os.path.getsize(file_path) == 0:
     print('System reminder: File exists but has empty contents')
     sys.exit(0)
 
-# Read file with offset and limit
+# 오프셋과 제한으로 파일 읽기
 with open(file_path, 'r') as f:
     lines = f.readlines()
 
-# Apply offset and limit
+# 오프셋과 제한 적용
 start_idx = offset
 end_idx = offset + limit
 selected_lines = lines[start_idx:end_idx]
 
-# Format with line numbers (1-indexed, starting from offset + 1)
+# 줄 번호와 함께 포맷팅 (1부터 시작, offset + 1부터 시작)
 for i, line in enumerate(selected_lines):
     line_num = offset + i + 1
-    # Remove trailing newline for formatting, then add it back
+    # 포맷팅을 위해 후행 줄바꿈 제거 후 다시 추가
     line_content = line.rstrip('\\n')
     print(f'{{line_num:6d}}\\t{{line_content}}')
 " 2>&1"""
 
 
 class BaseSandbox(SandboxBackendProtocol, ABC):
-    """Base sandbox implementation with execute() as abstract method.
+    """execute()를 추상 메서드로 하는 기본 샌드박스 구현.
 
-    This class provides default implementations for all protocol methods
-    using shell commands. Subclasses only need to implement execute().
+    이 클래스는 셸 명령을 사용하여 모든 프로토콜 메서드의
+    기본 구현을 제공합니다. 하위 클래스는 execute()만 구현하면 됩니다.
+
+    설계 철학:
+        - 셸 명령 기반으로 다양한 실행 환경 지원 (Docker, VM, 원격 서버 등)
+        - 파일 작업을 Python 스크립트로 구현하여 일관된 동작 보장
+        - 부분 성공 패턴으로 안정적인 배치 파일 작업 지원
+
+    하위 클래스가 구현해야 할 추상 메서드:
+        - execute(): 샌드박스에서 명령 실행
+        - id: 샌드박스의 고유 식별자 속성
+        - upload_files(): 파일 업로드
+        - download_files(): 파일 다운로드
     """
 
     @abstractmethod
@@ -548,18 +583,18 @@ class BaseSandbox(SandboxBackendProtocol, ABC):
         self,
         command: str,
     ) -> ExecuteResponse:
-        """Execute a command in the sandbox and return ExecuteResponse.
+        """샌드박스에서 명령을 실행하고 ExecuteResponse를 반환합니다.
 
-        Args:
-            command: Full shell command string to execute.
+        인자:
+            command: 실행할 전체 셸 명령 문자열.
 
-        Returns:
-            ExecuteResponse with combined output, exit code, optional signal, and truncation flag.
+        반환값:
+            결합된 출력, 종료 코드, 선택적 시그널, 잘림 플래그를 포함하는 ExecuteResponse.
         """
         ...
 
     def ls_info(self, path: str) -> list[FileInfo]:
-        """Structured listing with file metadata using os.scandir."""
+        """os.scandir를 사용하여 파일 메타데이터가 포함된 구조화된 목록 반환."""
         cmd = f"""python3 -c "
 import os
 import json

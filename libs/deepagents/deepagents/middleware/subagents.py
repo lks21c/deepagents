@@ -1,4 +1,40 @@
-"""Middleware for providing subagents to an agent via a `task` tool."""
+"""
+모듈명: subagents.py
+설명: task 도구를 통해 에이전트에 서브에이전트를 제공하는 미들웨어
+
+이 미들웨어는 에이전트에 task 도구를 추가하여 서브에이전트를 호출할 수 있게 합니다.
+서브에이전트는 여러 단계가 필요한 복잡한 작업이나, 해결에 많은 컨텍스트가
+필요한 작업을 처리하는 데 유용합니다.
+
+서브에이전트의 주요 장점:
+- 다단계 작업을 처리한 후 깔끔하고 간결한 응답을 메인 에이전트에 반환
+- 특정 도메인 전문성을 요구하는 작업에 좁은 도구 집합과 집중력 제공
+- 컨텍스트 윈도우 격리를 통한 토큰 사용량 최적화
+- 병렬 실행을 통한 성능 향상
+
+주요 클래스:
+- SubAgent: 서브에이전트 명세 TypedDict
+- CompiledSubAgent: 사전 컴파일된 에이전트 명세
+- SubAgentMiddleware: 서브에이전트 미들웨어
+
+사용 예시:
+    ```python
+    from deepagents.middleware import SubAgentMiddleware
+
+    middleware = SubAgentMiddleware(
+        backend=my_backend,
+        subagents=[
+            {
+                "name": "researcher",
+                "description": "Research agent for complex investigations",
+                "system_prompt": "You are a research specialist.",
+                "model": "openai:gpt-4o",
+                "tools": [search_tool],
+            }
+        ],
+    )
+    ```
+"""
 
 import warnings
 from collections.abc import Awaitable, Callable, Sequence
@@ -19,111 +55,114 @@ from deepagents.backends.protocol import BackendFactory, BackendProtocol
 from deepagents.middleware._utils import append_to_system_message
 
 
+# =============================================================================
+# 타입 정의
+# =============================================================================
+
+
 class SubAgent(TypedDict):
-    """Specification for an agent.
+    """
+    에이전트 명세를 위한 TypedDict
 
-    When using `create_deep_agent`, subagents automatically receive a default middleware
-    stack (TodoListMiddleware, FilesystemMiddleware, SummarizationMiddleware, etc.) before
-    any custom `middleware` specified in this spec.
+    `create_deep_agent`를 사용할 때, 서브에이전트는 이 명세에 지정된
+    사용자 정의 `middleware` 이전에 자동으로 기본 미들웨어 스택
+    (TodoListMiddleware, FilesystemMiddleware, SummarizationMiddleware 등)을 받습니다.
 
-    Required fields:
-        name: Unique identifier for the subagent.
+    필수 필드:
+        name: 서브에이전트의 고유 식별자
+            메인 에이전트가 task() 도구를 호출할 때 이 이름을 사용합니다.
+        description: 서브에이전트가 하는 일
+            구체적이고 행동 지향적으로 작성하세요.
+            메인 에이전트가 이를 보고 언제 위임할지 결정합니다.
+        system_prompt: 서브에이전트를 위한 지시사항
+            도구 사용 가이드와 출력 형식 요구사항을 포함하세요.
 
-            The main agent uses this name when calling the `task()` tool.
-        description: What this subagent does.
-
-            Be specific and action-oriented. The main agent uses this to decide when to delegate.
-        system_prompt: Instructions for the subagent.
-
-            Include tool usage guidance and output format requirements.
-
-    Optional fields:
-        tools: Tools the subagent can use.
-
-            If not specified, inherits tools from the main agent via `default_tools`.
-        model: Override the main agent's model.
-
-            Use the format `'provider:model-name'` (e.g., `'openai:gpt-4o'`).
-        middleware: Additional middleware for custom behavior, logging, or rate limiting.
-        interrupt_on: Configure human-in-the-loop for specific tools.
-
-            Requires a checkpointer.
-        skills: Skill source paths for SkillsMiddleware.
-
-            List of paths to skill directories (e.g., `["/skills/user/", "/skills/project/"]`).
+    선택 필드:
+        tools: 서브에이전트가 사용할 수 있는 도구들
+            지정하지 않으면 `default_tools`를 통해 메인 에이전트의 도구를 상속합니다.
+        model: 메인 에이전트의 모델 오버라이드
+            `'provider:model-name'` 형식 사용 (예: `'openai:gpt-4o'`).
+        middleware: 사용자 정의 동작, 로깅, 속도 제한을 위한 추가 미들웨어
+        interrupt_on: 특정 도구에 대한 human-in-the-loop 설정
+            체크포인터가 필요합니다.
+        skills: SkillsMiddleware용 스킬 소스 경로
+            스킬 디렉토리 경로 목록 (예: `["/skills/user/", "/skills/project/"]`).
     """
 
     name: str
-    """Unique identifier for the subagent."""
+    """서브에이전트의 고유 식별자"""
 
     description: str
-    """What this subagent does. The main agent uses this to decide when to delegate."""
+    """서브에이전트가 하는 일. 메인 에이전트가 위임 시점을 결정하는 데 사용됨."""
 
     system_prompt: str
-    """Instructions for the subagent."""
+    """서브에이전트를 위한 지시사항"""
 
     tools: NotRequired[Sequence[BaseTool | Callable | dict[str, Any]]]
-    """Tools the subagent can use. If not specified, inherits from main agent."""
+    """서브에이전트가 사용할 수 있는 도구들. 지정하지 않으면 메인 에이전트에서 상속."""
 
     model: NotRequired[str | BaseChatModel]
-    """Override the main agent's model. Use `'provider:model-name'` format."""
+    """메인 에이전트의 모델 오버라이드. `'provider:model-name'` 형식 사용."""
 
     middleware: NotRequired[list[AgentMiddleware]]
-    """Additional middleware for custom behavior."""
+    """사용자 정의 동작을 위한 추가 미들웨어"""
 
     interrupt_on: NotRequired[dict[str, bool | InterruptOnConfig]]
-    """Configure human-in-the-loop for specific tools."""
+    """특정 도구에 대한 human-in-the-loop 설정"""
 
     skills: NotRequired[list[str]]
-    """Skill source paths for SkillsMiddleware."""
+    """SkillsMiddleware용 스킬 소스 경로"""
 
 
 class CompiledSubAgent(TypedDict):
-    """A pre-compiled agent spec.
+    """
+    사전 컴파일된 에이전트 명세
 
-    !!! note
+    참고:
+        runnable의 상태 스키마에 'messages' 키가 포함되어야 합니다.
+        이는 서브에이전트가 메인 에이전트에 결과를 반환하는 데 필요합니다.
 
-        The runnable's state schema must include a 'messages' key.
-
-        This is required for the subagent to communicate results back to the main agent.
-
-    When the subagent completes, the final message in the 'messages' list will be
-    extracted and returned as a `ToolMessage` to the parent agent.
+    서브에이전트가 완료되면, 'messages' 리스트의 마지막 메시지가
+    추출되어 부모 에이전트에 `ToolMessage`로 반환됩니다.
     """
 
     name: str
-    """Unique identifier for the subagent."""
+    """서브에이전트의 고유 식별자"""
 
     description: str
-    """What this subagent does."""
+    """서브에이전트가 하는 일"""
 
     runnable: Runnable
-    """A custom agent implementation.
+    """
+    사용자 정의 에이전트 구현
 
-    Create a custom agent using either:
+    다음 중 하나를 사용하여 사용자 정의 에이전트를 생성할 수 있습니다:
 
-    1. LangChain's [`create_agent()`](https://docs.langchain.com/oss/python/langchain/quickstart)
-    2. A custom graph using [`langgraph`](https://docs.langchain.com/oss/python/langgraph/quickstart)
+    1. LangChain의 [`create_agent()`](https://docs.langchain.com/oss/python/langchain/quickstart)
+    2. [`langgraph`](https://docs.langchain.com/oss/python/langgraph/quickstart)를 사용한 사용자 정의 그래프
 
-    If you're creating a custom graph, make sure the state schema includes a 'messages' key.
-    This is required for the subagent to communicate results back to the main agent.
+    사용자 정의 그래프를 만드는 경우, 상태 스키마에 'messages' 키가 포함되어야 합니다.
+    이는 서브에이전트가 메인 에이전트에 결과를 반환하는 데 필요합니다.
     """
 
 
+# =============================================================================
+# 상수 정의
+# =============================================================================
+
+# 기본 서브에이전트 시스템 프롬프트
 DEFAULT_SUBAGENT_PROMPT = "In order to complete the objective that the user asks of you, you have access to a number of standard tools."
 
-# State keys that are excluded when passing state to subagents and when returning
-# updates from subagents.
+# 서브에이전트에 상태를 전달하거나 서브에이전트에서 업데이트를 반환할 때 제외되는 상태 키
 #
-# When returning updates:
-# 1. The messages key is handled explicitly to ensure only the final message is included
-# 2. The todos and structured_response keys are excluded as they do not have a defined reducer
-#    and no clear meaning for returning them from a subagent to the main agent.
-# 3. The skills_metadata and memory_contents keys are automatically excluded from subagent output
-#    via PrivateStateAttr annotations on their respective state schemas. However, they must ALSO
-#    be explicitly filtered from runtime.state when invoking a subagent to prevent parent state
-#    from leaking to child agents (e.g., the general-purpose subagent loads its own skills via
-#    SkillsMiddleware).
+# 업데이트 반환 시:
+# 1. messages 키는 마지막 메시지만 포함되도록 명시적으로 처리됨
+# 2. todos와 structured_response 키는 정의된 리듀서가 없고
+#    서브에이전트에서 메인 에이전트로 반환하는 데 명확한 의미가 없으므로 제외됨
+# 3. skills_metadata와 memory_contents 키는 각 상태 스키마의 PrivateStateAttr 어노테이션을 통해
+#    서브에이전트 출력에서 자동으로 제외됨. 그러나 부모 상태가 자식 에이전트로 누출되는 것을 방지하기 위해
+#    서브에이전트를 호출할 때 runtime.state에서도 명시적으로 필터링해야 함
+#    (예: 범용 서브에이전트는 SkillsMiddleware를 통해 자체 스킬을 로드함)
 _EXCLUDED_STATE_KEYS = {"messages", "todos", "structured_response", "skills_metadata", "memory_contents"}
 
 TASK_TOOL_DESCRIPTION = """Launch an ephemeral subagent to handle complex, multi-step independent tasks with isolated context windows.

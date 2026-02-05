@@ -1,4 +1,19 @@
-"""`FilesystemBackend`: Read and write files directly from the filesystem."""
+"""
+모듈명: filesystem.py
+설명: 파일시스템에서 직접 파일을 읽고 쓰는 FilesystemBackend
+
+이 모듈은 실제 파일시스템과 직접 상호작용하는 백엔드를 제공합니다.
+파일은 실제 파일시스템 경로를 사용하여 접근되며, 상대 경로는 현재 작업
+디렉토리를 기준으로 해석됩니다.
+
+주요 클래스:
+    - FilesystemBackend: 파일시스템에서 직접 읽기/쓰기를 수행하는 백엔드
+
+보안 고려사항:
+    - 에이전트에게 직접 파일시스템 읽기/쓰기 접근 권한을 부여합니다
+    - virtual_mode=True와 root_dir을 사용하여 경로 기반 접근 제한 활성화 권장
+    - 웹 서버나 HTTP API에서는 StateBackend, StoreBackend, SandboxBackend 사용 권장
+"""
 
 import json
 import os
