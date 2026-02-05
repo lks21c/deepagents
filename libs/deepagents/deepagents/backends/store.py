@@ -1,4 +1,34 @@
-"""StoreBackend: Adapter for LangGraph's BaseStore (persistent, cross-thread)."""
+"""
+모듈명: store.py
+설명: LangGraph BaseStore 어댑터 (영구 저장, 스레드 간 공유)
+
+이 모듈은 LangGraph의 Store를 활용하여 영구적이고 스레드 간 공유 가능한
+파일 저장소를 제공합니다. 파일은 네임스페이스를 통해 구성되며
+모든 스레드에서 지속됩니다.
+
+주요 특징:
+- LangGraph Store 기반의 영구 파일 저장소
+- 대화 간 파일 공유 및 지속성
+- 네임스페이스를 통한 파일 구성
+- 선택적 assistant_id를 통한 멀티 에이전트 격리
+
+주요 클래스:
+- StoreBackend: Store 기반 영구 파일 저장소 백엔드
+
+사용 예시:
+    ```python
+    from deepagents.backends.store import StoreBackend
+    from langchain.tools import ToolRuntime
+
+    backend = StoreBackend(runtime)
+    content = backend.read("/path/to/file.txt")
+    result = backend.write("/path/to/new_file.txt", "content")
+    ```
+
+의존성:
+- langgraph.store.base: BaseStore 인터페이스
+- langgraph.config: 설정 접근
+"""
 
 from typing import Any
 

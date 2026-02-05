@@ -1,23 +1,26 @@
-"""Middleware for loading agent memory/context from AGENTS.md files.
+"""
+모듈명: memory.py
+설명: AGENTS.md 파일에서 에이전트 메모리/컨텍스트를 로드하는 미들웨어
 
-This module implements support for the AGENTS.md specification (https://agents.md/),
-loading memory/context from configurable sources and injecting into the system prompt.
+이 모듈은 AGENTS.md 명세 (https://agents.md/)를 구현하여,
+설정 가능한 소스에서 메모리/컨텍스트를 로드하고 시스템 프롬프트에 주입합니다.
 
-## Overview
+## 개요
 
-AGENTS.md files provide project-specific context and instructions to help AI agents
-work effectively. Unlike skills (which are on-demand workflows), memory is always
-loaded and provides persistent context.
+AGENTS.md 파일은 AI 에이전트가 효과적으로 작업할 수 있도록
+프로젝트별 컨텍스트와 지시사항을 제공합니다.
+스킬(온디맨드 워크플로우)과 달리, 메모리는 항상 로드되어
+지속적인 컨텍스트를 제공합니다.
 
-## Usage
+## 사용 예시
 
 ```python
 from deepagents import MemoryMiddleware
 from deepagents.backends.filesystem import FilesystemBackend
 
-# Security: FilesystemBackend allows reading/writing from the entire filesystem.
-# Either ensure the agent is running within a sandbox OR add human-in-the-loop (HIL)
-# approval to file operations.
+# 보안: FilesystemBackend는 전체 파일시스템에서 읽기/쓰기를 허용합니다.
+# 에이전트가 샌드박스 내에서 실행되도록 하거나,
+# 파일 작업에 HIL(Human-in-the-loop) 승인을 추가하세요.
 backend = FilesystemBackend(root_dir="/")
 
 middleware = MemoryMiddleware(
@@ -31,20 +34,29 @@ middleware = MemoryMiddleware(
 agent = create_deep_agent(middleware=[middleware])
 ```
 
-## Memory Sources
+## 메모리 소스
 
-Sources are simply paths to AGENTS.md files that are loaded in order and combined.
-Multiple sources are concatenated in order, with all content included.
-Later sources appear after earlier ones in the combined prompt.
+소스는 순서대로 로드되어 결합되는 AGENTS.md 파일 경로입니다.
+여러 소스는 순서대로 연결되며, 모든 내용이 포함됩니다.
+나중 소스는 결합된 프롬프트에서 이전 소스 뒤에 나타납니다.
 
-## File Format
+## 파일 형식
 
-AGENTS.md files are standard Markdown with no required structure.
-Common sections include:
-- Project overview
-- Build/test commands
-- Code style guidelines
-- Architecture notes
+AGENTS.md 파일은 필수 구조가 없는 표준 마크다운입니다.
+일반적인 섹션:
+- 프로젝트 개요
+- 빌드/테스트 명령
+- 코드 스타일 가이드라인
+- 아키텍처 노트
+
+주요 클래스:
+- MemoryState: MemoryMiddleware의 상태 스키마
+- MemoryStateUpdate: 상태 업데이트 TypedDict
+- MemoryMiddleware: AGENTS.md 로딩 미들웨어
+
+의존성:
+- langchain.agents.middleware.types: 미들웨어 타입 정의
+- langgraph.runtime: 런타임 컨텍스트
 """
 
 from __future__ import annotations

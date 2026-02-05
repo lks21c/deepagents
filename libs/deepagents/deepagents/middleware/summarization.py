@@ -1,9 +1,17 @@
-"""Summarization middleware for offloading conversation history.
+"""
+모듈명: summarization.py
+설명: 대화 히스토리 오프로딩을 위한 요약 미들웨어
 
-Persists conversation history to a backend prior to summarization, enabling retrieval of
-full context if needed later by an agent.
+요약 전에 대화 히스토리를 백엔드에 저장하여, 나중에 에이전트가
+필요할 때 전체 컨텍스트를 검색할 수 있게 합니다.
 
-## Usage
+주요 기능:
+- 컨텍스트 윈도우가 임계값에 도달하면 자동 요약 트리거
+- 요약 전 메시지를 백엔드에 영구 저장
+- 오래된 메시지의 큰 도구 인자 자동 잘림
+- 연쇄 요약 시 중복 저장 방지
+
+## 사용 예시
 
 ```python
 from deepagents import create_deep_agent
@@ -15,19 +23,27 @@ backend = FilesystemBackend(root_dir="/data")
 middleware = SummarizationMiddleware(
     model="gpt-4o-mini",
     backend=backend,
-    trigger=("fraction", 0.85),
-    keep=("fraction", 0.10),
+    trigger=("fraction", 0.85),  # 컨텍스트의 85%에서 트리거
+    keep=("fraction", 0.10),     # 최근 10% 유지
 )
 
 agent = create_deep_agent(middleware=[middleware])
 ```
 
-## Storage
+## 저장소
 
-Offloaded messages are stored as markdown at `/conversation_history/{thread_id}.md`.
+오프로드된 메시지는 `/conversation_history/{thread_id}.md`에 마크다운으로 저장됩니다.
+각 요약 이벤트는 이 파일에 새 섹션을 추가하여, 제거된 모든 메시지의
+실행 로그를 생성합니다.
 
-Each summarization event appends a new section to this file, creating a running log
-of all evicted messages.
+주요 클래스:
+- TruncateArgsSettings: 도구 인자 잘림 설정
+- SummarizationDefaults: 모델 프로파일에서 계산된 기본 설정
+- SummarizationMiddleware: 백엔드 지원 요약 미들웨어
+
+의존성:
+- langchain.agents.middleware.summarization: 기본 요약 미들웨어
+- langgraph.graph.message: 메시지 관련 유틸리티
 """
 
 from __future__ import annotations

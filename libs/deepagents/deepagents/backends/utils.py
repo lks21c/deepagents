@@ -1,8 +1,37 @@
-"""Shared utility functions for memory backend implementations.
+"""
+모듈명: utils.py
+설명: 메모리 백엔드 구현을 위한 공유 유틸리티 함수
 
-This module contains both user-facing string formatters and structured
-helpers used by backends and the composite router. Structured helpers
-enable composition without fragile string parsing.
+이 모듈은 사용자에게 표시되는 문자열 포매터와 백엔드 및 컴포지트 라우터에서
+사용하는 구조화된 헬퍼 함수를 모두 포함합니다. 구조화된 헬퍼는 취약한
+문자열 파싱 없이 합성을 가능하게 합니다.
+
+주요 기능:
+- 파일 내용 포매팅 (라인 번호 포함)
+- 파일 데이터 생성 및 업데이트
+- 문자열 치환 수행
+- glob 패턴 매칭
+- grep 검색 기능
+- 경로 정규화 및 필터링
+
+상수:
+- EMPTY_CONTENT_WARNING: 빈 파일 경고 메시지
+- MAX_LINE_LENGTH: 최대 라인 길이 (5000자)
+- LINE_NUMBER_WIDTH: 라인 번호 너비 (6자리)
+- TOOL_RESULT_TOKEN_LIMIT: 도구 결과 토큰 제한 (20000)
+- TRUNCATION_GUIDANCE: 결과 잘림 안내 메시지
+
+주요 함수:
+- format_content_with_line_numbers(): 라인 번호를 포함한 내용 포매팅
+- create_file_data(): 타임스탬프와 함께 FileData 객체 생성
+- update_file_data(): 기존 FileData의 내용 업데이트
+- perform_string_replacement(): 문자열 치환 수행
+- grep_matches_from_files(): 파일에서 grep 매칭 수행
+- _glob_search_files(): glob 패턴으로 파일 검색
+
+타입:
+- FileInfo: 파일 정보 (경로, 크기, 수정일 등)
+- GrepMatch: grep 매칭 결과 (경로, 라인 번호, 텍스트)
 """
 
 import re

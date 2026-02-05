@@ -1,4 +1,34 @@
-"""StateBackend: Store files in LangGraph agent state (ephemeral)."""
+"""
+모듈명: state.py
+설명: LangGraph 에이전트 상태에 파일을 저장하는 백엔드 (임시 저장소)
+
+이 모듈은 LangGraph의 상태 관리 및 체크포인팅 기능을 활용하여
+에이전트 상태에 파일을 저장합니다. 파일은 대화 스레드 내에서만 유지되며
+스레드 간에는 공유되지 않습니다.
+
+주요 특징:
+- LangGraph 상태 기반의 임시 파일 저장소
+- 대화 스레드 범위 내 파일 지속성
+- 에이전트 단계마다 자동 체크포인팅
+- Command 객체를 통한 상태 업데이트 (uses_state=True 플래그)
+
+주요 클래스:
+- StateBackend: 상태 기반 파일 저장소 백엔드
+
+사용 예시:
+    ```python
+    from deepagents.backends.state import StateBackend
+    from langchain.tools import ToolRuntime
+
+    backend = StateBackend(runtime)
+    content = backend.read("/path/to/file.txt")
+    result = backend.write("/path/to/new_file.txt", "content")
+    ```
+
+참고:
+    LangGraph 상태는 직접 변경이 아닌 Command 객체를 통해 업데이트되어야 합니다.
+    따라서 이 백엔드의 쓰기 작업은 None 대신 Command 객체를 반환합니다.
+"""
 
 from typing import TYPE_CHECKING
 
