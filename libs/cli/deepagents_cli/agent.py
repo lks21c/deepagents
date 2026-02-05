@@ -1,4 +1,29 @@
-"""Agent management and creation for the CLI."""
+"""
+모듈명: agent.py
+설명: CLI를 위한 에이전트 관리 및 생성
+
+이 모듈은 Deep Agents CLI 에이전트를 생성하고 관리하는 핵심 기능을 제공합니다.
+로컬 모드와 원격 샌드박스 모드를 모두 지원하며, 메모리, 스킬, 셸 미들웨어를
+설정합니다.
+
+주요 기능:
+- 에이전트 목록 조회 및 관리
+- 에이전트 초기화 및 리셋
+- 시스템 프롬프트 생성
+- Human-in-the-loop 인터럽트 설정
+- 도구 호출 승인 포매터
+
+주요 함수:
+- list_agents(): 사용 가능한 에이전트 목록 표시
+- reset_agent(): 에이전트를 기본값으로 리셋
+- get_system_prompt(): 에이전트 시스템 프롬프트 생성
+- create_cli_agent(): CLI 에이전트 생성 (메인 진입점)
+
+의존성:
+- deepagents: 핵심 에이전트 프레임워크
+- langchain: LLM 도구 및 미들웨어
+- langgraph: 체크포인터 및 그래프 실행
+"""
 
 import os
 import shutil

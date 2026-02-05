@@ -1,4 +1,17 @@
-"""Custom tools for the CLI agent."""
+"""
+모듈명: tools.py
+설명: CLI 에이전트용 커스텀 도구 정의
+
+주요 기능:
+- web_search(): Tavily API를 사용한 웹 검색
+- fetch_url(): URL 콘텐츠를 마크다운으로 변환하여 가져오기
+- http_request(): 범용 HTTP 요청 실행
+
+의존성:
+- requests: HTTP 클라이언트
+- tavily: 웹 검색 API
+- markdownify: HTML을 마크다운으로 변환
+"""
 
 from typing import Any, Literal
 

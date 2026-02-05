@@ -1,4 +1,15 @@
-"""Loading widget with animated spinner for agent activity."""
+"""
+모듈명: loading.py
+설명: 에이전트 활동을 위한 애니메이션 스피너 로딩 위젯
+
+주요 기능:
+- Spinner: 문자셋에 맞는 프레임을 사용한 애니메이션 스피너
+- LoadingWidget: 상태 텍스트와 경과 시간이 표시되는 로딩 인디케이터
+
+의존성:
+- textual: Static, Horizontal 위젯
+- config: 글리프 설정
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,14 @@
-"""Utilities for project root detection and project-specific configuration."""
+"""
+모듈명: project_utils.py
+설명: 프로젝트 루트 감지 및 프로젝트별 설정 유틸리티
+
+주요 기능:
+- find_project_root(): .git 디렉토리를 찾아 프로젝트 루트 감지
+- find_project_agent_md(): 프로젝트별 agent.md 파일 찾기
+
+의존성:
+- pathlib: 파일 경로 처리
+"""
 
 from pathlib import Path
 

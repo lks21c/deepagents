@@ -1,12 +1,16 @@
-"""Skill loader for CLI commands.
+"""
+모듈명: load.py
+설명: CLI 명령을 위한 스킬 로더
 
-This module provides filesystem-based skill loading for CLI operations
-(list, create, info). It wraps the prebuilt middleware functionality from
-deepagents.middleware.skills and adapts it for direct filesystem access
-needed by CLI commands.
+CLI 작업(list, create, info)을 위한 파일시스템 기반 스킬 로딩을 제공합니다.
+deepagents.middleware.skills의 프리빌트 미들웨어 기능을 래핑하여
+CLI 명령에 필요한 직접 파일시스템 접근에 맞게 조정합니다.
 
-For middleware usage within agents, use
-deepagents.middleware.skills.SkillsMiddleware directly.
+에이전트 내 미들웨어 사용에는 deepagents.middleware.skills.SkillsMiddleware를
+직접 사용하세요.
+
+주요 기능:
+- list_skills(): 사용자 및/또는 프로젝트 디렉토리에서 스킬 목록 조회
 """
 
 from __future__ import annotations

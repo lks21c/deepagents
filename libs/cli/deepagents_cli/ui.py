@@ -1,4 +1,17 @@
-"""UI rendering and display utilities for the CLI."""
+"""
+모듈명: ui.py
+설명: CLI용 UI 렌더링 및 표시 유틸리티
+
+주요 기능:
+- format_tool_display(): 도구 호출을 사용자 친화적 형식으로 포맷팅
+- format_tool_message_content(): 도구 메시지 콘텐츠 변환
+- show_help(): 도움말 정보 표시
+- truncate_value(): 긴 문자열 자르기
+
+의존성:
+- rich: 터미널 서식 및 색상 처리
+- pathlib: 파일 경로 처리
+"""
 
 import json
 from contextlib import suppress

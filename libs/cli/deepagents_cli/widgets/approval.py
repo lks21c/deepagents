@@ -1,4 +1,15 @@
-"""Approval widget for HITL - using standard Textual patterns."""
+"""
+모듈명: approval.py
+설명: HITL(Human-In-The-Loop) 승인 위젯
+
+주요 기능:
+- ApprovalMenu: 도구 호출 승인/거부/자동승인 메뉴
+- Decided 메시지: 사용자 결정 이벤트 전달
+
+의존성:
+- textual: TUI 위젯 프레임워크
+- tool_renderers: 도구별 승인 위젯 렌더링
+"""
 
 from __future__ import annotations
 

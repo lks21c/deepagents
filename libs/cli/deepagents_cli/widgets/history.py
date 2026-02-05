@@ -1,4 +1,16 @@
-"""Command history manager for input persistence."""
+"""
+모듈명: history.py
+설명: 입력 영속성을 위한 명령어 히스토리 관리자
+
+주요 기능:
+- HistoryManager: 파일 영속성이 지원되는 명령어 히스토리 관리
+  - add(): 히스토리에 명령어 추가
+  - get_previous()/get_next(): 히스토리 탐색
+  - append-only 방식으로 동시 안전성 보장
+
+의존성:
+- json: 히스토리 파일 직렬화
+"""
 
 from __future__ import annotations
 

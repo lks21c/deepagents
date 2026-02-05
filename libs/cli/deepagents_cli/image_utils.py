@@ -1,4 +1,16 @@
-"""Utilities for handling image paste from clipboard."""
+"""
+모듈명: image_utils.py
+설명: 클립보드에서 이미지 붙여넣기를 처리하는 유틸리티
+
+주요 기능:
+- ImageData: 붙여넣은 이미지와 base64 인코딩을 나타내는 데이터클래스
+- get_clipboard_image(): 시스템 클립보드에서 이미지 읽기
+- create_multimodal_content(): 텍스트와 이미지로 멀티모달 메시지 생성
+
+의존성:
+- PIL: 이미지 처리
+- subprocess: macOS 클립보드 접근 (pngpaste, osascript)
+"""
 
 import base64
 import io

@@ -1,4 +1,17 @@
-"""Helpers for tracking file operations and computing diffs for CLI display."""
+"""
+모듈명: file_ops.py
+설명: CLI 표시를 위한 파일 작업 추적 및 diff 계산 헬퍼
+
+주요 기능:
+- FileOpTracker: 파일 작업 메트릭 수집 클래스
+- compute_unified_diff(): unified diff 생성
+- build_approval_preview(): HITL 승인 미리보기 생성
+- resolve_physical_path(): 가상/상대 경로를 물리적 경로로 변환
+
+의존성:
+- difflib: 텍스트 diff 생성
+- deepagents.backends: 파일 백엔드 프로토콜
+"""
 
 from __future__ import annotations
 

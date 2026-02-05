@@ -1,4 +1,15 @@
-"""Enhanced diff widget for displaying unified diffs."""
+"""
+모듈명: diff.py
+설명: 유니파이드 diff 표시를 위한 향상된 위젯
+
+주요 기능:
+- EnhancedDiff: 구문 강조가 적용된 diff 표시 위젯
+- format_diff_textual(): Rich 마크업이 적용된 diff 포맷팅
+
+의존성:
+- textual: Vertical, Static 컨테이너
+- config: 문자셋 모드 감지 및 글리프
+"""
 
 from __future__ import annotations
 

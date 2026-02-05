@@ -1,4 +1,17 @@
-"""Implement harbor backend."""
+"""
+모듈명: backend.py
+설명: Harbor 환경용 샌드박스 백엔드 구현
+
+주요 기능:
+- HarborSandbox: 셸 명령을 사용한 샌드박스 구현
+  - aexecute(): bash 명령 실행
+  - aread()/awrite()/aedit(): 파일 작업
+  - als_info()/agrep_raw()/aglob_info(): 파일 검색
+
+의존성:
+- deepagents.backends.protocol: 백엔드 프로토콜 정의
+- harbor.environments.base: Harbor 기본 환경
+"""
 
 import base64
 import json

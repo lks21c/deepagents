@@ -1,4 +1,16 @@
-"""Tool renderers for approval widgets - registry pattern."""
+"""
+모듈명: tool_renderers.py
+설명: 승인 위젯용 도구 렌더러 - 레지스트리 패턴
+
+주요 기능:
+- ToolRenderer: 도구 승인 위젯의 기본 렌더러
+- WriteFileRenderer: write_file 도구용 렌더러 (전체 파일 내용 표시)
+- EditFileRenderer: edit_file 도구용 렌더러 (유니파이드 diff 표시)
+- get_renderer(): 도구 이름으로 적절한 렌더러 조회
+
+의존성:
+- tool_widgets: 도구별 승인 위젯 클래스
+"""
 
 from __future__ import annotations
 

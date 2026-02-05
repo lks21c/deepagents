@@ -1,4 +1,18 @@
-"""A wrapper for Deep Agents to run in Harbor environments."""
+"""
+모듈명: deepagents_wrapper.py
+설명: Harbor 환경에서 Deep Agents를 실행하기 위한 래퍼
+
+주요 기능:
+- DeepAgentsWrapper: Harbor 에이전트 구현
+  - run(): 지시사항에 따라 Deep Agent 실행
+  - _save_trajectory(): 궤적을 로그 디렉토리에 저장
+
+의존성:
+- deepagents: Deep Agent 생성
+- deepagents_cli.agent: CLI 에이전트 생성
+- harbor: Harbor 에이전트 및 환경 기본 클래스
+- langsmith: 실험 추적 및 피드백
+"""
 
 import json
 import os

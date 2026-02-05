@@ -1,4 +1,17 @@
-"""Main entry point and CLI loop for deepagents."""
+"""
+모듈명: main.py
+설명: deepagents-cli의 메인 진입점 및 CLI 루프
+
+주요 기능:
+- cli_main(): CLI 애플리케이션 메인 진입점
+- parse_args(): 명령줄 인자 파싱
+- run_textual_cli_async(): Textual CLI 인터페이스 실행
+
+의존성:
+- argparse: 명령줄 인자 파싱
+- textual: TUI 애플리케이션 프레임워크
+- langgraph: 체크포인트 기반 세션 관리
+"""
 
 # ruff: noqa: E402
 # Imports placed after warning filters to suppress deprecation warnings

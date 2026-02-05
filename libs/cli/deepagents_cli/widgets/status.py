@@ -1,4 +1,17 @@
-"""Status bar widget for deepagents-cli."""
+"""
+모듈명: status.py
+설명: deepagents-cli용 상태 표시줄 위젯
+
+주요 기능:
+- StatusBar: 모드, 자동승인 상태, 작업 디렉토리, 토큰 수 표시
+  - mode: 입력 모드 (normal/bash/command)
+  - auto_approve: 자동승인 활성화 상태
+  - tokens: 컨텍스트 토큰 수
+
+의존성:
+- textual: Horizontal, Static 위젯
+- config: 설정값
+"""
 
 from __future__ import annotations
 

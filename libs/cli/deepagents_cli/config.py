@@ -1,4 +1,34 @@
-"""Configuration, constants, and model creation for the CLI."""
+"""
+모듈명: config.py
+설명: CLI를 위한 설정, 상수 및 모델 생성
+
+이 모듈은 Deep Agents CLI의 전역 설정, 환경 감지, 모델 생성을 담당합니다.
+API 키 감지, 프로젝트 루트 찾기, 문자셋 모드 감지 등의 기능을 제공합니다.
+
+주요 기능:
+- API 키 감지 (OpenAI, Anthropic, Google, Tavily)
+- 프로젝트 루트 및 AGENTS.md 파일 감지
+- 문자셋 모드 감지 (유니코드/ASCII)
+- 글리프 시스템 (유니코드/ASCII 문자)
+- 모델 생성 및 검증
+
+주요 클래스:
+- CharsetMode: 문자셋 모드 열거형
+- Glyphs: TUI 표시용 문자 글리프
+- Settings: 전역 설정 및 환경 감지
+- SessionState: 세션 상태 관리
+
+주요 함수:
+- get_glyphs(): 현재 문자셋 모드의 글리프 반환
+- get_banner(): 배너 텍스트 아트 반환
+- create_model(): 설정된 모델 생성
+- validate_model_capabilities(): 모델 기능 검증
+
+상수:
+- COLORS: 색상 스킴
+- COMMANDS: 대화형 명령어
+- config: 런타임 설정
+"""
 
 import json
 import os

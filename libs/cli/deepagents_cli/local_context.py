@@ -1,4 +1,18 @@
-"""Middleware for injecting local context into system prompt."""
+"""
+모듈명: local_context.py
+설명: 시스템 프롬프트에 로컬 컨텍스트를 주입하는 미들웨어
+
+주요 기능:
+- LocalContextMiddleware: 로컬 환경 정보를 수집하여 시스템 프롬프트에 추가
+  - Git 브랜치 정보 감지
+  - 패키지 관리자 감지 (uv, poetry, npm 등)
+  - 디렉토리 트리 구조 생성
+  - 프로젝트 언어 및 구조 감지
+
+의존성:
+- subprocess: git 명령 실행
+- langchain.agents.middleware: 미들웨어 기본 클래스
+"""
 
 from __future__ import annotations
 

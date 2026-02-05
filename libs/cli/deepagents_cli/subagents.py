@@ -1,12 +1,14 @@
-"""Subagent loader for CLI.
+"""
+모듈명: subagents.py
+설명: CLI용 서브에이전트 로더
 
-Loads custom subagent definitions from the filesystem. Subagents are defined
-as markdown files with YAML frontmatter in the agents/ directory.
+파일시스템에서 커스텀 서브에이전트 정의를 로드합니다.
+서브에이전트는 agents/ 디렉토리에 YAML 프론트매터가 있는 마크다운 파일로 정의됩니다.
 
-Directory structure:
+디렉토리 구조:
     .deepagents/agents/{agent_name}/AGENTS.md
 
-Example file (researcher/AGENTS.md):
+예시 파일 (researcher/AGENTS.md):
     ---
     name: researcher
     description: Research topics on the web before writing content
@@ -15,9 +17,13 @@ Example file (researcher/AGENTS.md):
 
     You are a research assistant with access to web search.
 
-    ## Your Process
-    1. Search for relevant information
-    2. Summarize findings clearly
+주요 기능:
+- list_subagents(): 사용자 및 프로젝트 디렉토리에서 서브에이전트 목록 조회
+- _parse_subagent_file(): YAML 프론트매터가 있는 마크다운 파일 파싱
+
+의존성:
+- yaml: YAML 프론트매터 파싱
+- pathlib: 파일 경로 처리
 """
 
 from __future__ import annotations

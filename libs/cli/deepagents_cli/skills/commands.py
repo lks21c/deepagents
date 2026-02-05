@@ -1,9 +1,18 @@
-"""CLI commands for skill management.
+"""
+모듈명: commands.py
+설명: 스킬 관리를 위한 CLI 명령
 
-These commands are registered with the CLI via cli.py:
+CLI에 등록된 명령:
 - deepagents skills list --agent <agent> [--project]
 - deepagents skills create <name>
 - deepagents skills info <name>
+
+주요 기능:
+- execute_skills_command(): 스킬 서브커맨드 실행
+- setup_skills_parser(): argparse 설정
+- _list(): 사용 가능한 스킬 목록 표시
+- _create(): 새 스킬 생성
+- _info(): 스킬 상세 정보 표시
 """
 
 import argparse

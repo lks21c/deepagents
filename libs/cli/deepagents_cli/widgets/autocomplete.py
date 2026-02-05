@@ -1,7 +1,15 @@
-"""Autocomplete system for @ mentions and / commands.
+"""
+모듈명: autocomplete.py
+설명: @ 멘션 및 / 명령어 자동완성 시스템
 
-This is a custom implementation that handles trigger-based completion
-for slash commands (/) and file mentions (@).
+주요 기능:
+- SlashCommandController: /명령어 자동완성 컨트롤러
+- FuzzyFileController: @파일 퍼지 검색 자동완성
+- MultiCompletionManager: 다중 완성 컨트롤러 관리자
+
+의존성:
+- textual: 키 이벤트 처리
+- subprocess: git ls-files를 통한 프로젝트 파일 목록 조회
 """
 
 from __future__ import annotations

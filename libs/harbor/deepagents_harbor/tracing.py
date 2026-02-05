@@ -1,4 +1,16 @@
-"""LangSmith integration for Harbor Deep Agents."""
+"""
+모듈명: tracing.py
+설명: Harbor Deep Agents용 LangSmith 통합
+
+주요 기능:
+- create_example_id_from_instruction(): 지시사항 문자열에서 결정론적 UUID 생성
+  - 공백 정규화 및 SHA-256 해싱
+  - LangSmith 호환 UUID 반환
+
+의존성:
+- hashlib: SHA-256 해싱
+- uuid: UUID 생성
+"""
 
 import hashlib
 import uuid

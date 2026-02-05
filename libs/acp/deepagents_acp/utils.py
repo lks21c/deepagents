@@ -1,3 +1,18 @@
+"""
+모듈명: utils.py
+설명: ACP 콘텐츠 블록을 LangChain 형식으로 변환하는 유틸리티
+
+주요 기능:
+- convert_text_block_to_content_blocks(): 텍스트 블록 변환
+- convert_image_block_to_content_blocks(): 이미지 블록 변환 (base64 데이터 URI)
+- convert_audio_block_to_content_blocks(): 오디오 블록 변환 (미지원)
+- convert_resource_block_to_content_blocks(): 리소스 참조 블록 변환
+- convert_embedded_resource_block_to_content_blocks(): 임베디드 리소스 블록 변환
+
+의존성:
+- acp.schema: ACP 콘텐츠 블록 스키마
+"""
+
 from acp.schema import (
     AudioContentBlock,
     EmbeddedResourceContentBlock,

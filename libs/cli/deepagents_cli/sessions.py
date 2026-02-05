@@ -1,4 +1,18 @@
-"""Thread management using LangGraph's built-in checkpoint persistence."""
+"""
+모듈명: sessions.py
+설명: LangGraph 체크포인트 영속성을 사용한 스레드(세션) 관리
+
+주요 기능:
+- generate_thread_id(): 새 스레드 ID 생성
+- list_threads(): 스레드 목록 조회
+- get_most_recent(): 가장 최근 스레드 조회
+- delete_thread(): 스레드 삭제
+- get_checkpointer(): AsyncSqliteSaver 컨텍스트 매니저
+
+의존성:
+- aiosqlite: 비동기 SQLite 접근
+- langgraph: 체크포인트 직렬화 및 저장
+"""
 
 import uuid
 from collections.abc import AsyncIterator

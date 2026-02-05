@@ -1,4 +1,16 @@
-"""Simplified middleware that exposes a basic shell tool to agents."""
+"""
+모듈명: shell.py
+설명: 에이전트에게 기본 셸 도구를 노출하는 간소화된 미들웨어
+
+주요 기능:
+- ShellMiddleware: 로컬 머신에서 셸 명령 실행
+  - 타임아웃 및 출력 크기 제한 지원
+  - human-in-the-loop 승인을 보안 경계로 사용
+
+의존성:
+- subprocess: 셸 명령 실행
+- langchain.agents.middleware: 미들웨어 기본 클래스
+"""
 
 from __future__ import annotations
 

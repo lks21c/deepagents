@@ -1,4 +1,15 @@
-"""Input handling utilities including image tracking and file mention parsing."""
+"""
+모듈명: input.py
+설명: 이미지 추적 및 파일 멘션 파싱을 포함한 입력 처리 유틸리티
+
+주요 기능:
+- ImageTracker: 대화에서 붙여넣은 이미지 추적 클래스
+- parse_file_mentions(): @파일 멘션을 추출하고 파일 경로로 변환
+
+의존성:
+- pathlib: 파일 경로 처리
+- deepagents_cli.image_utils: 이미지 데이터 구조
+"""
 
 import re
 from pathlib import Path

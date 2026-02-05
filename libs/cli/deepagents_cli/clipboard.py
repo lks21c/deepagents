@@ -1,4 +1,15 @@
-"""Clipboard utilities for deepagents-cli."""
+"""
+모듈명: clipboard.py
+설명: deepagents-cli용 클립보드 유틸리티
+
+주요 기능:
+- copy_selection_to_clipboard(): 선택된 텍스트를 시스템 클립보드로 복사
+- _copy_osc52(): OSC 52 이스케이프 시퀀스를 사용한 복사 (SSH/tmux 지원)
+
+의존성:
+- pyperclip: 크로스 플랫폼 클립보드 접근 (선택적)
+- textual: TUI 앱 통합
+"""
 
 from __future__ import annotations
 

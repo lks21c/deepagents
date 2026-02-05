@@ -1,3 +1,21 @@
+"""
+모듈명: agent.py
+설명: ACP(Agent Context Protocol) Deep Agent 구현
+
+주요 기능:
+- ACPDeepAgent: ACP 프로토콜을 구현한 Deep Agent 클래스
+  - initialize(): 에이전트 초기화 및 기능 알림
+  - new_session(): 새 세션 생성
+  - prompt(): 사용자 프롬프트 처리 및 응답 스트리밍
+  - set_session_mode(): 세션 모드 변경 (ask_before_edits/auto)
+- run_agent(): ACP 에이전트 시작
+
+의존성:
+- acp: Agent Context Protocol 라이브러리
+- deepagents: Deep Agent 생성
+- langgraph: 체크포인트 및 상태 관리
+"""
+
 import json
 from typing import Any
 from uuid import uuid4

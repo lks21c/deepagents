@@ -1,4 +1,17 @@
-"""Chat input widget for deepagents-cli with autocomplete and history support."""
+"""
+모듈명: chat_input.py
+설명: 자동완성 및 히스토리 지원 채팅 입력 위젯
+
+주요 기능:
+- ChatInput: 프롬프트, 멀티라인 텍스트, 자동완성, 히스토리 통합 위젯
+- ChatTextArea: 커스텀 키 핸들링이 적용된 TextArea
+- CompletionPopup: 자동완성 제안 팝업
+
+의존성:
+- textual: TextArea, Container, Static 위젯
+- autocomplete: 자동완성 컨트롤러
+- history: 명령어 히스토리 관리
+"""
 
 from __future__ import annotations
 

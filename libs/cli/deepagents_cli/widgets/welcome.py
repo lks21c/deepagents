@@ -1,4 +1,18 @@
-"""Welcome banner widget for deepagents-cli."""
+"""
+모듈명: welcome.py
+설명: deepagents-cli용 환영 배너 위젯
+
+주요 기능:
+- WelcomeBanner: 시작 시 표시되는 환영 배너
+  - 스레드 ID 표시
+  - LangSmith 추적 프로젝트 URL 표시 (활성화된 경우)
+  - 개발 설치 여부에 따른 색상 구분
+
+의존성:
+- textual: Static 위젯
+- rich: 텍스트 스타일링
+- langsmith: 프로젝트 URL 조회 (선택적)
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,15 @@
-"""Modal sandbox backend implementation."""
+"""
+모듈명: modal.py
+설명: Modal 샌드박스 백엔드 구현
+
+주요 기능:
+- ModalBackend: Modal 샌드박스에서 명령 실행 및 파일 작업
+- ModalProvider: Modal 샌드박스 생명주기 관리
+
+의존성:
+- modal: Modal SDK
+- deepagents.backends: 백엔드 프로토콜 및 기본 클래스
+"""
 
 from __future__ import annotations
 

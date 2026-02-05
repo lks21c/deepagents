@@ -1,3 +1,15 @@
+"""
+모듈명: __main__.py
+설명: ACP DeepAgent의 진입점
+
+주요 기능:
+- main(): 지정된 루트 디렉토리로 ACP DeepAgent 실행
+  - --root-dir: 에이전트가 접근 가능한 루트 디렉토리 (기본값: 현재 작업 디렉토리)
+
+의존성:
+- deepagents_acp.agent: 에이전트 실행 함수
+"""
+
 import argparse
 import asyncio
 import os

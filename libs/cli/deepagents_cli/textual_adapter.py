@@ -1,4 +1,16 @@
-"""Textual UI adapter for agent execution."""
+"""
+모듈명: textual_adapter.py
+설명: 에이전트 실행을 위한 Textual UI 어댑터
+
+주요 기능:
+- TextualUIAdapter: 에이전트 출력을 Textual 위젯으로 렌더링하는 어댑터
+- execute_task_textual(): Textual UI로 출력을 보내는 태스크 실행
+
+의존성:
+- textual: TUI 프레임워크
+- langchain: HITL(Human-In-The-Loop) 요청/응답 처리
+- langgraph: 스트리밍 및 인터럽트 처리
+"""
 # This module has complex streaming logic ported from execution.py
 
 from __future__ import annotations

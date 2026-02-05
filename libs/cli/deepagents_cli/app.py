@@ -1,4 +1,30 @@
-"""Textual UI application for deepagents-cli."""
+"""
+모듈명: app.py
+설명: deepagents-cli를 위한 Textual UI 애플리케이션
+
+이 모듈은 Deep Agents CLI의 메인 TUI(터미널 사용자 인터페이스) 애플리케이션을
+구현합니다. Textual 프레임워크를 사용하여 대화형 채팅 인터페이스를 제공합니다.
+
+주요 기능:
+- 채팅 메시지 표시 및 입력
+- 도구 호출 승인 UI
+- 토큰 사용량 추적
+- 세션 상태 관리
+- 자동 승인 모드 전환
+- 스레드 히스토리 로딩
+
+주요 클래스:
+- TextualTokenTracker: 토큰 추적 및 상태바 업데이트
+- TextualSessionState: 세션 상태 관리
+- DeepAgentsApp: 메인 Textual 애플리케이션
+
+주요 함수:
+- run_textual_app(): Textual 앱 실행 진입점
+
+의존성:
+- textual: TUI 프레임워크
+- langchain_core.messages: 메시지 타입
+"""
 
 from __future__ import annotations
 

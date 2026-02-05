@@ -1,4 +1,15 @@
-"""BackendProtocol implementation for Runloop."""
+"""
+모듈명: runloop.py
+설명: Runloop용 BackendProtocol 구현
+
+주요 기능:
+- RunloopBackend: Runloop devbox에서 명령 실행 및 파일 작업
+- RunloopProvider: Runloop devbox 생명주기 관리
+
+의존성:
+- runloop_api_client: Runloop API 클라이언트
+- deepagents.backends: 백엔드 프로토콜 및 기본 클래스
+"""
 
 import importlib.util
 

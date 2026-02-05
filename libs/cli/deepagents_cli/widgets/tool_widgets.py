@@ -1,4 +1,16 @@
-"""Tool-specific approval widgets for HITL display."""
+"""
+모듈명: tool_widgets.py
+설명: HITL 표시를 위한 도구별 승인 위젯
+
+주요 기능:
+- ToolApprovalWidget: 도구 승인 위젯의 기본 클래스
+- GenericApprovalWidget: 알 수 없는 도구용 범용 위젯
+- WriteFileApprovalWidget: 파일 쓰기 도구용 위젯 (구문 강조 지원)
+- EditFileApprovalWidget: 파일 편집 도구용 위젯 (컬러 diff 표시)
+
+의존성:
+- textual: Vertical, Static, Markdown 위젯
+"""
 
 from __future__ import annotations
 

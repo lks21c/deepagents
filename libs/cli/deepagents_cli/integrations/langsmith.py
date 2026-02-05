@@ -1,4 +1,15 @@
-"""LangSmith sandbox backend implementation."""
+"""
+모듈명: langsmith.py
+설명: LangSmith 샌드박스 백엔드 구현
+
+주요 기능:
+- LangSmithBackend: LangSmith 샌드박스에서 명령 실행 및 파일 작업
+- LangSmithProvider: LangSmith 샌드박스 생명주기 관리
+
+의존성:
+- langsmith: LangSmith SDK
+- deepagents.backends: 백엔드 프로토콜 및 기본 클래스
+"""
 
 from __future__ import annotations
 

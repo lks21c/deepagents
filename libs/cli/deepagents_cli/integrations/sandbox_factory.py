@@ -1,4 +1,17 @@
-"""Sandbox lifecycle management with provider abstraction."""
+"""
+모듈명: sandbox_factory.py
+설명: 프로바이더 추상화를 통한 샌드박스 생명주기 관리
+
+주요 기능:
+- create_sandbox(): 지정된 프로바이더의 샌드박스 생성 또는 연결
+- get_default_working_dir(): 프로바이더별 기본 작업 디렉토리 조회
+
+지원 프로바이더:
+- daytona, langsmith, modal, runloop
+
+의존성:
+- deepagents.backends: 샌드박스 프로토콜 및 프로바이더
+"""
 
 import os
 import shlex

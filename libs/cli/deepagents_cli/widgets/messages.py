@@ -1,4 +1,19 @@
-"""Message widgets for deepagents-cli."""
+"""
+모듈명: messages.py
+설명: deepagents-cli용 메시지 위젯
+
+주요 기능:
+- UserMessage: 사용자 메시지 표시
+- AssistantMessage: 마크다운 지원 어시스턴트 메시지 (스트리밍 지원)
+- ToolCallMessage: 접을 수 있는 출력이 있는 도구 호출 표시
+- DiffMessage: 구문 강조가 적용된 diff 표시
+- ErrorMessage: 오류 메시지 표시
+- AppMessage: 앱 시스템 메시지 표시
+
+의존성:
+- textual: Vertical, Static, Markdown 위젯
+- rich: 텍스트 스타일링
+"""
 
 from __future__ import annotations
 
