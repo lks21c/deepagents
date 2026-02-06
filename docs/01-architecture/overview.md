@@ -4,57 +4,49 @@
 
 ## 아키텍처 다이어그램
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           Deep Agent System                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                     create_deep_agent()                               │   │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐ │   │
-│  │  │    model    │  │    tools    │  │  subagents  │  │   backend    │ │   │
-│  │  │(BaseChatModel)│ │ (BaseTool[])│  │ (SubAgent[])│  │(BackendProto)│ │   │
-│  │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬───────┘ │   │
-│  └─────────┼────────────────┼────────────────┼────────────────┼─────────┘   │
-│            │                │                │                │             │
-│            ▼                ▼                ▼                ▼             │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                      Middleware Stack (순서대로 적용)                  │   │
-│  │  ┌────────────────────────────────────────────────────────────────┐  │   │
-│  │  │  1. TodoListMiddleware      - 할 일 목록 관리                   │  │   │
-│  │  │  2. MemoryMiddleware        - AGENTS.md 로딩 (if memory)        │  │   │
-│  │  │  3. SkillsMiddleware        - SKILL.md 로딩 (if skills)         │  │   │
-│  │  │  4. FilesystemMiddleware    - 파일 시스템 도구                   │  │   │
-│  │  │  5. SubAgentMiddleware      - 서브에이전트 관리                  │  │   │
-│  │  │  6. SummarizationMiddleware - 컨텍스트 요약                     │  │   │
-│  │  │  7. AnthropicPromptCachingMiddleware - 프롬프트 캐싱            │  │   │
-│  │  │  8. PatchToolCallsMiddleware - 도구 호출 패치                   │  │   │
-│  │  │  9. [사용자 정의 미들웨어...]                                    │  │   │
-│  │  │ 10. HumanInTheLoopMiddleware - 승인 워크플로우 (if interrupt_on)│  │   │
-│  │  └────────────────────────────────────────────────────────────────┘  │   │
-│  └──────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                         │
-│                                    ▼                                         │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                        LangGraph Agent                                │   │
-│  │  ┌────────────────┐    ┌────────────────┐    ┌─────────────────────┐ │   │
-│  │  │  Agent State   │◄──►│  Tool Executor │◄──►│  Message History   │ │   │
-│  │  │  (messages,    │    │  (ls, read,    │    │  (HumanMessage,    │ │   │
-│  │  │   files,       │    │   write, grep, │    │   AIMessage,       │ │   │
-│  │  │   todos, ...)  │    │   task, ...)   │    │   ToolMessage)     │ │   │
-│  │  └────────────────┘    └────────────────┘    └─────────────────────┘ │   │
-│  └──────────────────────────────────────────────────────────────────────┘   │
-│                                    │                                         │
-│                                    ▼                                         │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                         Backend Layer                                 │   │
-│  │  ┌──────────────┐  ┌────────────────┐  ┌───────────────────────────┐ │   │
-│  │  │ StateBackend │  │FilesystemBackend│  │    SandboxBackend        │ │   │
-│  │  │  (임시 상태)  │  │  (로컬 파일)    │  │  (명령 실행 + 파일)       │ │   │
-│  │  └──────────────┘  └────────────────┘  └───────────────────────────┘ │   │
-│  └──────────────────────────────────────────────────────────────────────┘   │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph DeepAgentSystem["Deep Agent System"]
+        subgraph Factory["create_deep_agent()"]
+            model["model<br/>(BaseChatModel)"]
+            tools["tools<br/>(BaseTool[])"]
+            subagents["subagents<br/>(SubAgent[])"]
+            backend_param["backend<br/>(BackendProto)"]
+        end
+
+        subgraph MiddlewareStack["Middleware Stack (순서대로 적용)"]
+            mw1["1. TodoListMiddleware - 할 일 목록 관리"]
+            mw2["2. MemoryMiddleware - AGENTS.md 로딩"]
+            mw3["3. SkillsMiddleware - SKILL.md 로딩"]
+            mw4["4. FilesystemMiddleware - 파일 시스템 도구"]
+            mw5["5. SubAgentMiddleware - 서브에이전트 관리"]
+            mw6["6. SummarizationMiddleware - 컨텍스트 요약"]
+            mw7["7. AnthropicPromptCachingMiddleware - 프롬프트 캐싱"]
+            mw8["8. PatchToolCallsMiddleware - 도구 호출 패치"]
+            mw9["9. 사용자 정의 미들웨어"]
+            mw10["10. HumanInTheLoopMiddleware - 승인 워크플로우"]
+        end
+
+        subgraph LangGraphAgent["LangGraph Agent"]
+            state["Agent State<br/>(messages, files, todos, ...)"]
+            executor["Tool Executor<br/>(ls, read, write, grep, task, ...)"]
+            history["Message History<br/>(HumanMessage, AIMessage, ToolMessage)"]
+            state <--> executor <--> history
+        end
+
+        subgraph BackendLayer["Backend Layer"]
+            state_backend["StateBackend<br/>(임시 상태)"]
+            fs_backend["FilesystemBackend<br/>(로컬 파일)"]
+            sandbox_backend["SandboxBackend<br/>(명령 실행 + 파일)"]
+        end
+
+        model --> MiddlewareStack
+        tools --> MiddlewareStack
+        subagents --> MiddlewareStack
+        backend_param --> MiddlewareStack
+        MiddlewareStack --> LangGraphAgent
+        LangGraphAgent --> BackendLayer
+    end
 ```
 
 ## 핵심 컴포넌트
@@ -195,38 +187,16 @@ class SubAgent(TypedDict):
 
 **서브에이전트 생명주기**:
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        SubAgent Lifecycle                            │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  1. Spawn (생성)                                                     │
-│     ┌──────────────────────────────────────────────────────────┐    │
-│     │ 메인 에이전트가 task() 도구 호출                          │    │
-│     │ → description과 subagent_type 전달                        │    │
-│     └──────────────────────────────────────────────────────────┘    │
-│                              │                                       │
-│                              ▼                                       │
-│  2. Run (실행)                                                       │
-│     ┌──────────────────────────────────────────────────────────┐    │
-│     │ 서브에이전트가 독립적인 컨텍스트에서 작업 수행            │    │
-│     │ → 자체 메시지 히스토리, 도구 호출, 상태 관리              │    │
-│     └──────────────────────────────────────────────────────────┘    │
-│                              │                                       │
-│                              ▼                                       │
-│  3. Return (반환)                                                    │
-│     ┌──────────────────────────────────────────────────────────┐    │
-│     │ 최종 메시지를 ToolMessage로 변환하여 메인에게 반환        │    │
-│     │ → 중간 과정은 숨겨지고 결과만 전달                        │    │
-│     └──────────────────────────────────────────────────────────┘    │
-│                              │                                       │
-│                              ▼                                       │
-│  4. Reconcile (통합)                                                 │
-│     ┌──────────────────────────────────────────────────────────┐    │
-│     │ 메인 에이전트가 결과를 통합하거나 합성                    │    │
-│     └──────────────────────────────────────────────────────────┘    │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph Lifecycle["SubAgent Lifecycle"]
+        spawn["1. Spawn (생성)<br/>메인 에이전트가 task() 도구 호출<br/>→ description과 subagent_type 전달"]
+        run["2. Run (실행)<br/>서브에이전트가 독립적인 컨텍스트에서 작업 수행<br/>→ 자체 메시지 히스토리, 도구 호출, 상태 관리"]
+        ret["3. Return (반환)<br/>최종 메시지를 ToolMessage로 변환하여 메인에게 반환<br/>→ 중간 과정은 숨겨지고 결과만 전달"]
+        reconcile["4. Reconcile (통합)<br/>메인 에이전트가 결과를 통합하거나 합성"]
+
+        spawn --> run --> ret --> reconcile
+    end
 ```
 
 **설계 이유**:
@@ -238,55 +208,31 @@ class SubAgent(TypedDict):
 
 ### 에이전트 실행 흐름
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Data Flow                                    │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  1. 사용자 입력                                                      │
-│     │                                                                │
-│     ▼                                                                │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │ agent.invoke({"messages": [HumanMessage("...")]})            │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│     │                                                                │
-│     ▼                                                                │
-│  2. 미들웨어 전처리 (before_agent, modify_request)                  │
-│     │                                                                │
-│     ├─► MemoryMiddleware: AGENTS.md 내용을 시스템 프롬프트에 주입   │
-│     ├─► SkillsMiddleware: 사용 가능한 스킬 목록 주입                │
-│     └─► SubAgentMiddleware: 서브에이전트 설명 주입                  │
-│     │                                                                │
-│     ▼                                                                │
-│  3. LLM 호출                                                         │
-│     │                                                                │
-│     ├─► 시스템 프롬프트 + 메시지 히스토리 + 도구 정의              │
-│     └─► AIMessage 반환 (텍스트 응답 또는 도구 호출)                │
-│     │                                                                │
-│     ▼                                                                │
-│  4. 도구 실행 (도구 호출이 있는 경우)                                │
-│     │                                                                │
-│     ├─► FilesystemMiddleware: ls, read_file, write_file, ...       │
-│     ├─► SubAgentMiddleware: task (서브에이전트 호출)               │
-│     └─► 기타 커스텀 도구                                            │
-│     │                                                                │
-│     ▼                                                                │
-│  5. 상태 업데이트                                                    │
-│     │                                                                │
-│     ├─► messages: 새 메시지 추가                                    │
-│     ├─► files: 파일 변경 사항 반영                                  │
-│     └─► todos: 할 일 목록 업데이트                                  │
-│     │                                                                │
-│     ▼                                                                │
-│  6. 반복 또는 종료                                                   │
-│     │                                                                │
-│     ├─► 도구 호출 결과가 있으면 3단계로 돌아감                      │
-│     └─► 텍스트 응답만 있으면 종료                                   │
-│     │                                                                │
-│     ▼                                                                │
-│  7. 최종 상태 반환                                                   │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    input["1. 사용자 입력<br/>agent.invoke({messages: [HumanMessage(...)]})"]
+    preprocess["2. 미들웨어 전처리<br/>(before_agent, modify_request)"]
+    memory_mw["MemoryMiddleware:<br/>AGENTS.md 내용을 시스템 프롬프트에 주입"]
+    skills_mw["SkillsMiddleware:<br/>사용 가능한 스킬 목록 주입"]
+    subagent_mw["SubAgentMiddleware:<br/>서브에이전트 설명 주입"]
+    llm["3. LLM 호출<br/>시스템 프롬프트 + 메시지 히스토리 + 도구 정의<br/>→ AIMessage 반환 (텍스트 응답 또는 도구 호출)"]
+    tool_exec["4. 도구 실행"]
+    fs_tools["FilesystemMiddleware:<br/>ls, read_file, write_file, ..."]
+    sa_tools["SubAgentMiddleware:<br/>task (서브에이전트 호출)"]
+    custom_tools["기타 커스텀 도구"]
+    state_update["5. 상태 업데이트<br/>messages / files / todos"]
+    decision{"6. 도구 호출 결과?"}
+    final["7. 최종 상태 반환"]
+
+    input --> preprocess
+    preprocess --> memory_mw & skills_mw & subagent_mw
+    memory_mw & skills_mw & subagent_mw --> llm
+    llm --> tool_exec
+    tool_exec --> fs_tools & sa_tools & custom_tools
+    fs_tools & sa_tools & custom_tools --> state_update
+    state_update --> decision
+    decision -- "있음 → 3단계로" --> llm
+    decision -- "텍스트 응답만 → 종료" --> final
 ```
 
 ### 상태 스키마 (State Schema)
