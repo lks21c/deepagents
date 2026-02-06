@@ -8,6 +8,7 @@
 graph TD
     subgraph DeepAgentSystem["Deep Agent System"]
         subgraph Factory["create_deep_agent()"]
+            direction LR
             model["model<br/>(BaseChatModel)"]
             tools["tools<br/>(BaseTool[])"]
             subagents["subagents<br/>(SubAgent[])"]
@@ -15,19 +16,19 @@ graph TD
         end
 
         subgraph MiddlewareStack["Middleware Stack (순서대로 적용)"]
-            mw1["1. TodoListMiddleware - 할 일 목록 관리"]
-            mw2["2. MemoryMiddleware - AGENTS.md 로딩"]
-            mw3["3. SkillsMiddleware - SKILL.md 로딩"]
-            mw4["4. FilesystemMiddleware - 파일 시스템 도구"]
-            mw5["5. SubAgentMiddleware - 서브에이전트 관리"]
-            mw6["6. SummarizationMiddleware - 컨텍스트 요약"]
-            mw7["7. AnthropicPromptCachingMiddleware - 프롬프트 캐싱"]
-            mw8["8. PatchToolCallsMiddleware - 도구 호출 패치"]
-            mw9["9. 사용자 정의 미들웨어"]
-            mw10["10. HumanInTheLoopMiddleware - 승인 워크플로우"]
+            mw1["1. TodoListMiddleware"] --> mw2["2. MemoryMiddleware"]
+            mw2 --> mw3["3. SkillsMiddleware"]
+            mw3 --> mw4["4. FilesystemMiddleware"]
+            mw4 --> mw5["5. SubAgentMiddleware"]
+            mw5 --> mw6["6. SummarizationMiddleware"]
+            mw6 --> mw7["7. AnthropicPromptCachingMiddleware"]
+            mw7 --> mw8["8. PatchToolCallsMiddleware"]
+            mw8 --> mw9["9. 사용자 정의 미들웨어"]
+            mw9 --> mw10["10. HumanInTheLoopMiddleware"]
         end
 
         subgraph LangGraphAgent["LangGraph Agent"]
+            direction LR
             state["Agent State<br/>(messages, files, todos, ...)"]
             executor["Tool Executor<br/>(ls, read, write, grep, task, ...)"]
             history["Message History<br/>(HumanMessage, AIMessage, ToolMessage)"]
@@ -35,15 +36,13 @@ graph TD
         end
 
         subgraph BackendLayer["Backend Layer"]
+            direction LR
             state_backend["StateBackend<br/>(임시 상태)"]
             fs_backend["FilesystemBackend<br/>(로컬 파일)"]
             sandbox_backend["SandboxBackend<br/>(명령 실행 + 파일)"]
         end
 
-        model --> MiddlewareStack
-        tools --> MiddlewareStack
-        subagents --> MiddlewareStack
-        backend_param --> MiddlewareStack
+        Factory --> MiddlewareStack
         MiddlewareStack --> LangGraphAgent
         LangGraphAgent --> BackendLayer
     end
