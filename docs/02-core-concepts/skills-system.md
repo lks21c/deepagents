@@ -15,41 +15,14 @@
 | 크기 | 작음 (상시 로드) | 클 수 있음 (필요시 로드) |
 | 파일 | AGENTS.md | SKILL.md |
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Progressive Disclosure Pattern                    │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│   ┌────────────────────────────────────────────────────────────┐    │
-│   │  Phase 1: 메타데이터만 로드 (항상)                          │    │
-│   │                                                             │    │
-│   │  Available Skills:                                          │    │
-│   │  - web-research: 웹 리서치를 수행하는 구조화된 접근 방식    │    │
-│   │    → Read `/skills/web-research/SKILL.md` for instructions  │    │
-│   │  - code-review: 코드 품질 및 보안 검토                      │    │
-│   │    → Read `/skills/code-review/SKILL.md` for instructions   │    │
-│   │                                                             │    │
-│   └────────────────────────────────────────────────────────────┘    │
-│                               │                                      │
-│                               ▼ (사용자가 리서치 요청)               │
-│   ┌────────────────────────────────────────────────────────────┐    │
-│   │  Phase 2: 전체 지시사항 로드 (필요할 때)                    │    │
-│   │                                                             │    │
-│   │  Agent reads: /skills/web-research/SKILL.md                 │    │
-│   │                                                             │    │
-│   │  # Web Research Skill                                       │    │
-│   │  ## When to Use                                             │    │
-│   │  - 사용자가 주제를 조사해달라고 요청할 때                   │    │
-│   │                                                             │    │
-│   │  ## Workflow                                                │    │
-│   │  1. 검색 전략 수립                                          │    │
-│   │  2. 다양한 쿼리로 정보 수집                                 │    │
-│   │  3. 수집한 정보 검증 및 정리                                │    │
-│   │  ...                                                        │    │
-│   │                                                             │    │
-│   └────────────────────────────────────────────────────────────┘    │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph Progressive["Progressive Disclosure Pattern"]
+        P1["Phase 1: 메타데이터만 로드 &#40;항상&#41;<br/><br/>Available Skills:<br/>- web-research: 웹 리서치를 수행하는 구조화된 접근 방식<br/>  → Read /skills/web-research/SKILL.md<br/>- code-review: 코드 품질 및 보안 검토<br/>  → Read /skills/code-review/SKILL.md"]
+        P2["Phase 2: 전체 지시사항 로드 &#40;필요할 때&#41;<br/><br/>Agent reads: /skills/web-research/SKILL.md<br/><br/># Web Research Skill<br/>## When to Use<br/>- 사용자가 주제를 조사해달라고 요청할 때<br/>## Workflow<br/>1. 검색 전략 수립<br/>2. 다양한 쿼리로 정보 수집<br/>3. 수집한 정보 검증 및 정리"]
+
+        P1 -->|"사용자가 리서치 요청"| P2
+    end
 ```
 
 ---

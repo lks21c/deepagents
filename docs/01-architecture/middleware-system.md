@@ -6,53 +6,25 @@
 
 미들웨어(Middleware)는 에이전트의 요청-응답 사이클에 개입하여 동작을 확장하거나 수정하는 컴포넌트입니다. 각 미들웨어는 특정 책임을 가지며, 스택 형태로 순서대로 적용됩니다.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     Middleware Stack Flow                            │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  사용자 입력                                                          │
-│      │                                                               │
-│      ▼                                                               │
-│  ┌─────────────────────────────────────────────────────────────┐    │
-│  │ 1. TodoListMiddleware                                        │    │
-│  │    └── before_agent: 할 일 도구 추가                          │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 2. MemoryMiddleware                                          │    │
-│  │    └── before_agent: AGENTS.md 로딩                          │    │
-│  │    └── wrap_model_call: 시스템 프롬프트에 메모리 주입         │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 3. SkillsMiddleware                                          │    │
-│  │    └── before_agent: SKILL.md 메타데이터 로딩                │    │
-│  │    └── wrap_model_call: 시스템 프롬프트에 스킬 목록 주입      │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 4. FilesystemMiddleware                                      │    │
-│  │    └── tools: ls, read_file, write_file, edit_file, ...     │    │
-│  │    └── wrap_tool_call: 대용량 결과 파일 저장                  │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 5. SubAgentMiddleware                                        │    │
-│  │    └── tools: task (서브에이전트 호출)                        │    │
-│  │    └── wrap_model_call: 서브에이전트 설명 주입                │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 6. SummarizationMiddleware                                   │    │
-│  │    └── 긴 컨텍스트 자동 요약                                  │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 7. AnthropicPromptCachingMiddleware                          │    │
-│  │    └── Anthropic 모델 프롬프트 캐싱 최적화                    │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 8. PatchToolCallsMiddleware                                  │    │
-│  │    └── 도구 호출 결과 패치                                    │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 9. [사용자 정의 미들웨어]                                     │    │
-│  ├─────────────────────────────────────────────────────────────┤    │
-│  │ 10. HumanInTheLoopMiddleware (선택)                          │    │
-│  │    └── 특정 도구 실행 전 승인 요청                            │    │
-│  └─────────────────────────────────────────────────────────────┘    │
-│      │                                                               │
-│      ▼                                                               │
-│  LLM 응답                                                            │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Input["사용자 입력"] --> mw1
+    subgraph MiddlewareStack["Middleware Stack Flow"]
+        mw1["1. TodoListMiddleware<br/>before_agent: 할 일 도구 추가"]
+        mw2["2. MemoryMiddleware<br/>before_agent: AGENTS.md 로딩<br/>wrap_model_call: 시스템 프롬프트에 메모리 주입"]
+        mw3["3. SkillsMiddleware<br/>before_agent: SKILL.md 메타데이터 로딩<br/>wrap_model_call: 시스템 프롬프트에 스킬 목록 주입"]
+        mw4["4. FilesystemMiddleware<br/>tools: ls, read_file, write_file, edit_file, ...<br/>wrap_tool_call: 대용량 결과 파일 저장"]
+        mw5["5. SubAgentMiddleware<br/>tools: task &#40;서브에이전트 호출&#41;<br/>wrap_model_call: 서브에이전트 설명 주입"]
+        mw6["6. SummarizationMiddleware<br/>긴 컨텍스트 자동 요약"]
+        mw7["7. AnthropicPromptCachingMiddleware<br/>Anthropic 모델 프롬프트 캐싱 최적화"]
+        mw8["8. PatchToolCallsMiddleware<br/>도구 호출 결과 패치"]
+        mw9["9. 사용자 정의 미들웨어"]
+        mw10["10. HumanInTheLoopMiddleware &#40;선택&#41;<br/>특정 도구 실행 전 승인 요청"]
+
+        mw1 --> mw2 --> mw3 --> mw4 --> mw5
+        mw5 --> mw6 --> mw7 --> mw8 --> mw9 --> mw10
+    end
+    mw10 --> Output["LLM 응답"]
 ```
 
 ## 미들웨어 생명주기 메서드

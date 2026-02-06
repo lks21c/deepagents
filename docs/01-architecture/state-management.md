@@ -6,44 +6,15 @@
 
 Deep Agents는 LangGraph의 상태 관리 시스템을 기반으로 합니다. 상태는 TypedDict로 정의되며, 각 미들웨어가 자신의 상태 스키마를 확장합니다.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                       State Management Flow                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│   ┌────────────────────────────────────────────────────────────┐    │
-│   │                    Initial State                            │    │
-│   │                                                             │    │
-│   │   {                                                         │    │
-│   │     "messages": [HumanMessage("질문...")]                   │    │
-│   │   }                                                         │    │
-│   └────────────────────────────────────────────────────────────┘    │
-│                               │                                      │
-│                               ▼                                      │
-│   ┌────────────────────────────────────────────────────────────┐    │
-│   │              Middleware State Extensions                    │    │
-│   │                                                             │    │
-│   │   TodoListMiddleware → + todos: list[Todo]                  │    │
-│   │   MemoryMiddleware → + memory_contents: dict                │    │
-│   │   SkillsMiddleware → + skills_metadata: list[SkillMetadata] │    │
-│   │   SubAgentMiddleware → (no state extension)                 │    │
-│   │                                                             │    │
-│   └────────────────────────────────────────────────────────────┘    │
-│                               │                                      │
-│                               ▼                                      │
-│   ┌────────────────────────────────────────────────────────────┐    │
-│   │                    Final State                              │    │
-│   │                                                             │    │
-│   │   {                                                         │    │
-│   │     "messages": [HumanMessage, AIMessage, ...],             │    │
-│   │     "todos": [...],                                         │    │
-│   │     "memory_contents": {...},                               │    │
-│   │     "skills_metadata": [...]                                │    │
-│   │   }                                                         │    │
-│   │                                                             │    │
-│   └────────────────────────────────────────────────────────────┘    │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph StateManagement["State Management Flow"]
+        IS["Initial State<br/>{messages: [HumanMessage&#40;'질문...'&#41;]}"]
+        ME["Middleware State Extensions<br/>TodoListMiddleware → + todos: list[Todo]<br/>MemoryMiddleware → + memory_contents: dict<br/>SkillsMiddleware → + skills_metadata: list[SkillMetadata]<br/>SubAgentMiddleware → &#40;no state extension&#41;"]
+        FS["Final State<br/>{messages: [HumanMessage, AIMessage, ...],<br/>todos: [...],<br/>memory_contents: {...},<br/>skills_metadata: [...]}"]
+
+        IS --> ME --> FS
+    end
 ```
 
 ---

@@ -12,27 +12,28 @@
 
 ### 배포 토폴로지
 
-```
-                    ┌─────────────────┐
-                    │   Load Balancer │
-                    └────────┬────────┘
-                             │
-           ┌─────────────────┼─────────────────┐
-           │                 │                 │
-    ┌──────▼──────┐   ┌──────▼──────┐   ┌──────▼──────┐
-    │  Agent Pod  │   │  Agent Pod  │   │  Agent Pod  │
-    │  Instance 1 │   │  Instance 2 │   │  Instance 3 │
-    └──────┬──────┘   └──────┬──────┘   └──────┬──────┘
-           │                 │                 │
-           └─────────────────┼─────────────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              │              │              │
-       ┌──────▼──────┐  ┌────▼────┐  ┌─────▼─────┐
-       │ PostgreSQL  │  │  Redis  │  │ LLM APIs  │
-       │ Checkpoint  │  │  Cache  │  │(Anthropic,│
-       │   Store     │  │         │  │  OpenAI)  │
-       └─────────────┘  └─────────┘  └───────────┘
+```mermaid
+graph TD
+    LB["Load Balancer"]
+    AP1["Agent Pod<br/>Instance 1"]
+    AP2["Agent Pod<br/>Instance 2"]
+    AP3["Agent Pod<br/>Instance 3"]
+    PG["PostgreSQL<br/>Checkpoint Store"]
+    RD["Redis<br/>Cache"]
+    LLM["LLM APIs<br/>&#40;Anthropic, OpenAI&#41;"]
+
+    LB --> AP1
+    LB --> AP2
+    LB --> AP3
+    AP1 --> PG
+    AP1 --> RD
+    AP1 --> LLM
+    AP2 --> PG
+    AP2 --> RD
+    AP2 --> LLM
+    AP3 --> PG
+    AP3 --> RD
+    AP3 --> LLM
 ```
 
 ### 구성 요소별 책임
